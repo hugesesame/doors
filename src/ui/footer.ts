@@ -10,7 +10,7 @@ export function createFooter(app: App, transport: HTMLElement) {
   const offlineReady = h(
     'span',
     { class: 'offline-ready', hidden: true, title: 'This browser keeps a copy of the app, so it opens without a connection' },
-    'Ready offline',
+    'Ready Offline',
   );
 
   const element = h(

@@ -17,7 +17,7 @@
 - **Drop and go**: drop audio files anywhere on the window, or press **Add Files**. Video files work too: their sound is used. Each file is analysed in turn as it comes.
 - **Even loudness**: every track is brought to -16 LUFS, so no track suddenly jumps out. A quiet track is raised by 10 dB at most, so its noise is not raised with it, and a limiter keeps the peaks under -1 dBTP.
 - **No gaps**: silence at the start and the end of each track is cut.
-- **Crossfades** from 0 to 10 s in steps of 0.1 s (slide, or type the value), with equal-power curves so the level does not dip. Next to a short track the crossfade is shortened to half of that track.
+- **Crossfades** from 0 to 10 s in steps of 0.1 s (slide, or type the value), with equal-power curves so the level does not dip. Next to a short track the crossfade is shortened to half of that track. The same crossfade is used between every pair of tracks: it cannot be set track by track.
 - **Drag to reorder**; × takes a file off the list. Files that cannot be used (unreadable, without sound, or silent throughout) are shown in red and left out.
 - **The finished mix on a waveform**, with each track's name and the crossfades marked. Click anywhere to move the playhead there, or click a name to go to that track's start; zoom in to check a transition.
 - **A player as in [Show Tracks](https://github.com/hugesesame/show-tracks)**: go to the start, back / forward 5 s, play / stop, previous / next track, with the same keys.

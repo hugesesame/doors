@@ -40,7 +40,7 @@ const HELP: Record<Lang, Text> = {
         rows: [
           ['Loudness', 'Every track is brought to -16 LUFS. A quiet track is raised by 10 dB at most, so its noise is not raised with it.'],
           ['Silence', 'Silence at the start and the end of a track (below -50 dB for 0.5 s or more) is cut, so there are no gaps.'],
-          ['Crossfade', '0 to 10 s in steps of 0.1 s (slide, or type the value), with equal-power curves so the level does not dip. Next to a short track it is shortened to half of that track.'],
+          ['Crossfade', '0 to 10 s in steps of 0.1 s (slide, or type the value), with equal-power curves so the level does not dip. Next to a short track it is shortened to half of that track. The same crossfade is used between every pair of tracks: it cannot be set track by track.'],
           ['Peaks', 'A limiter keeps the peaks under -1 dBTP.'],
           ['Output', '44.1 kHz stereo: MP3 320k, WAV 16-bit, FLAC or AAC 256k (.m4a).'],
         ],
@@ -105,7 +105,7 @@ const HELP: Record<Lang, Text> = {
         rows: [
           ['音量', 'すべての曲を -16 LUFS に揃えます。静かな曲を上げるのは最大 10 dB までです。録音のノイズまで持ち上げないためです。'],
           ['無音', '曲の頭と終わりにある無音（-50 dB 以下が 0.5 秒以上）を削り、曲間に間が空かないようにします。'],
-          ['クロスフェード', '0〜10 秒を 0.1 秒刻みで設定できます（スライダーか、数字の入力）。重なっている間も音量がへこまない形（equal-power）でつなぎます。短い曲の前後では、その曲の長さの半分まで短くします。'],
+          ['クロスフェード', '0〜10 秒を 0.1 秒刻みで設定できます（スライダーか、数字の入力）。重なっている間も音量がへこまない形（equal-power）でつなぎます。短い曲の前後では、その曲の長さの半分まで短くします。すべての曲間で同じ長さを使い、曲ごとに変えることはできません。'],
           ['ピーク', 'リミッターで、ピークを -1 dBTP 以下に抑えます。'],
           ['出力', '44.1 kHz ステレオ。MP3 320k、WAV 16 bit、FLAC、AAC 256k（.m4a）から選べます。'],
         ],

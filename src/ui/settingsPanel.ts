@@ -5,7 +5,15 @@ import { h } from './dom';
 
 /** SETTINGS: the crossfade (not shown for a single track) and the output format. */
 export function createSettingsPanel(app: App) {
-  const crossfade = h('input', { type: 'range', min: 0, max: MAX_CROSSFADE_SEC, step: CROSSFADE_STEP_SEC });
+  /** One length for every join: there is no per-track crossfade, and the tooltips say so. */
+  const crossfadeHint = 'One crossfade for every join between tracks';
+  const crossfade = h('input', {
+    type: 'range',
+    min: 0,
+    max: MAX_CROSSFADE_SEC,
+    step: CROSSFADE_STEP_SEC,
+    title: crossfadeHint,
+  });
   crossfade.addEventListener('input', () => app.setCrossfade(Number(crossfade.value)));
   // The exact value can be typed too; it is taken on Enter or on leaving the field.
   const crossfadeValue = h('input', {
@@ -14,7 +22,7 @@ export function createSettingsPanel(app: App) {
     min: 0,
     max: MAX_CROSSFADE_SEC,
     step: CROSSFADE_STEP_SEC,
-    title: 'Crossfade in seconds',
+    title: `${crossfadeHint}, in seconds`,
   });
   crossfadeValue.addEventListener('change', () => {
     app.setCrossfade(crossfadeValue.value === '' ? Number.NaN : Number(crossfadeValue.value));
@@ -27,7 +35,7 @@ export function createSettingsPanel(app: App) {
   const crossfadeRow = h(
     'div',
     { class: 'setting' },
-    h('span', { class: 'setting-label' }, 'Crossfade'),
+    h('span', { class: 'setting-label', title: crossfadeHint }, 'Crossfade'),
     crossfade,
     h('span', { class: 'setting-value' }, crossfadeValue, h('span', { class: 'unit' }, 's')),
   );
