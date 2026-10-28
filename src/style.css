@@ -1,4 +1,32 @@
+/* Day mode, the default. */
 :root {
+  --bg: #f3f4f6;
+  --panel: #ffffff;
+  --panel-raised: #f1f3f6;
+  --line: #d8dce3;
+  --text: #1a1d23;
+  --muted: #6b7280;
+  --accent: #1f6fd1;
+  --accent-hover: #3b82e0;
+  --on-accent: #ffffff;
+  --go: #16a34a;
+  --go-tint: rgba(22, 163, 74, 0.1);
+  --go-tint-strong: rgba(22, 163, 74, 0.2);
+  --danger: #dc2626;
+  --danger-bg: #fdecec;
+  --warn: #d97706;
+  --warn-bg: #fff7e6;
+  --warn-text: #92400e;
+  --hover-line: #b8bfca;
+  --hover-bg: #e8ebf0;
+  --backdrop: rgba(15, 18, 24, 0.35);
+  --font: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', 'Segoe UI', sans-serif;
+  --mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+
+/* Night mode: the dark look of the other apps (Show Tracks, TC-CD, GO PRMPT). */
+:root[data-theme='night'] {
   --bg: #0b0d10;
   --panel: #13161b;
   --panel-raised: #1a1e25;
@@ -6,11 +34,19 @@
   --text: #e6e8eb;
   --muted: #7d8590;
   --accent: #4da3ff;
+  --accent-hover: #6cb4ff;
+  --on-accent: #06121f;
   --go: #22c55e;
+  --go-tint: rgba(34, 197, 94, 0.12);
+  --go-tint-strong: rgba(34, 197, 94, 0.25);
   --danger: #ef4444;
+  --danger-bg: #3a1f22;
   --warn: #f59e0b;
-  --font: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', 'Segoe UI', sans-serif;
-  --mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+  --warn-bg: rgba(245, 158, 11, 0.1);
+  --warn-text: #fcd34d;
+  --hover-line: #3a414d;
+  --hover-bg: #222730;
+  --backdrop: rgba(0, 0, 0, 0.6);
   color-scheme: dark;
 }
 
@@ -53,8 +89,8 @@ a.button {
 
 button:hover:not(:disabled),
 a.button:hover {
-  border-color: #3a414d;
-  background: #222730;
+  border-color: var(--hover-line);
+  background: var(--hover-bg);
 }
 
 button:disabled {
@@ -70,13 +106,13 @@ button.small {
 a.button.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #06121f;
+  color: var(--on-accent);
   font-weight: 600;
   text-align: center;
 }
 
 a.button.primary:hover {
-  background: #6cb4ff;
+  background: var(--accent-hover);
 }
 
 input,
@@ -175,12 +211,34 @@ input[type='range']::-moz-range-thumb {
   gap: 8px;
 }
 
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.segmented button {
+  border: none;
+  border-radius: 0;
+  padding: 3px 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.segmented button.active {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
 .engine-banner {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 4px 6px 4px 12px;
-  background: #3a1f22;
+  background: var(--danger-bg);
   border: 1px solid var(--danger);
   border-radius: 6px;
 }
@@ -423,8 +481,8 @@ input[type='range']::-moz-range-thumb {
   padding: 8px 10px;
   border: 1px solid var(--warn);
   border-radius: 6px;
-  background: rgba(245, 158, 11, 0.1);
-  color: #fcd34d;
+  background: var(--warn-bg);
+  color: var(--warn-text);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -447,18 +505,18 @@ input[type='range']::-moz-range-thumb {
 }
 
 .go:hover:not(:disabled) {
-  background: rgba(34, 197, 94, 0.12);
+  background: var(--go-tint);
   border-color: var(--go);
 }
 
 .go:active:not(:disabled) {
-  background: rgba(34, 197, 94, 0.25);
+  background: var(--go-tint-strong);
   transform: translateY(1px);
 }
 
 .go.running {
   opacity: 1;
-  background: rgba(34, 197, 94, 0.12);
+  background: var(--go-tint);
 }
 
 .mix-note {
@@ -535,7 +593,7 @@ input[type='range']::-moz-range-thumb {
   padding: 10px 12px;
   border: 1px solid var(--danger);
   border-radius: 6px;
-  background: #3a1f22;
+  background: var(--danger-bg);
 }
 
 .failed summary {
@@ -617,7 +675,7 @@ dialog {
 }
 
 dialog::backdrop {
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--backdrop);
 }
 
 dialog.help {
@@ -690,7 +748,7 @@ dialog.help {
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--backdrop);
   border: 3px dashed var(--accent);
 }
 

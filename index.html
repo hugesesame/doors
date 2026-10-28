@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BGM Mixer</title>
+    <script>
+      // Night mode is set before the page is drawn, so it does not flash in Day mode first (see src/ui/theme.ts).
+      try {
+        if (localStorage.getItem('bgm-mixer-theme') === 'night') document.documentElement.dataset.theme = 'night';
+      } catch {}
+    </script>
   </head>
   <body>
     <div id="app"></div>
