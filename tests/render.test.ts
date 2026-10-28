@@ -1,10 +1,11 @@
 // Mixes generated tones with the native ffmpeg, using the arguments the app builds,
 // and measures the result. Skipped where ffmpeg is not installed.
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { WAVE_RATE } from '../src/config';
 import { analysisArgs, parseAnalysis } from '../src/core/analysis';
 import { renderArgs } from '../src/core/filtergraph';
 import { FORMATS } from '../src/core/formats';
@@ -57,7 +58,7 @@ describe.skipIf(!hasFfmpeg)('render with the native ffmpeg', () => {
       names.map((id) => ({ id, result: { ok: true, analysis: analyse(path(id)) } })),
       4,
     );
-    ffmpeg(renderArgs(plan, path, FORMATS.mp3, path('mix.mp3')));
+    ffmpeg(renderArgs(plan, path, FORMATS.mp3, path('mix.mp3'), path('wave.raw')));
 
     const mix = analyse(path('mix.mp3'));
     expect(Math.abs(mix.duration - plan.total)).toBeLessThanOrEqual(0.1);
@@ -67,9 +68,30 @@ describe.skipIf(!hasFfmpeg)('render with the native ffmpeg', () => {
     expect(mix.tailSilence).toBe(0);
   });
 
+  it('writes a waveform copy as long as the mix, loudest where the loud track plays', () => {
+    const names = ['a.wav', 'b.flac', 'c.mp3'];
+    const plan = makePlan(
+      names.map((id) => ({ id, result: { ok: true, analysis: analyse(path(id)) } })),
+      4,
+    );
+    ffmpeg(renderArgs(plan, path, FORMATS.mp3, path('mix2.mp3'), path('wave2.raw')));
+
+    const raw = readFileSync(path('wave2.raw'));
+    const samples = new Int16Array(raw.buffer, raw.byteOffset, raw.length / 2);
+    expect(Math.abs(samples.length / WAVE_RATE - plan.total)).toBeLessThanOrEqual(0.1);
+    // Levelled, every track should reach a similar peak; nothing close to silence in the middle of one.
+    const peakAt = (second: number) => {
+      let max = 0;
+      for (let i = second * WAVE_RATE; i < (second + 1) * WAVE_RATE; i++) max = Math.max(max, Math.abs(samples[i]));
+      return max;
+    };
+    expect(peakAt(5)).toBeGreaterThan(1000);
+    expect(peakAt(Math.floor(plan.total) - 3)).toBeGreaterThan(1000);
+  });
+
   it('converts a single mono track to a stereo WAV at the target loudness', () => {
     const plan = makePlan([{ id: 'a.wav', result: { ok: true, analysis: analyse(path('a.wav')) } }], 4);
-    ffmpeg(renderArgs(plan, path, FORMATS.wav, path('single.wav')));
+    ffmpeg(renderArgs(plan, path, FORMATS.wav, path('single.wav'), path('single-wave.raw')));
 
     const single = analyse(path('single.wav'));
     expect(Math.abs(single.duration - 20)).toBeLessThanOrEqual(0.1);

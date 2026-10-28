@@ -1,20 +1,23 @@
-import { DEFAULT_CROSSFADE_SEC, MAX_CROSSFADE_SEC, MAX_OUTPUT_BYTES } from '../config';
+import { DEFAULT_CROSSFADE_SEC, MAX_CROSSFADE_SEC, MAX_OUTPUT_BYTES, WAVE_RATE } from '../config';
 import { outputName } from '../core/filename';
 import { DEFAULT_FORMAT, estimateBytes, FORMATS, type FormatId, type OutputFormat } from '../core/formats';
+import { buildPeaks, type Peaks } from '../core/peaks';
 import { makePlan, type Plan } from '../core/plan';
 import type { Progress } from '../core/progress';
+import { timelineOf, type Segment, type Timeline } from '../core/timeline';
 import type { AnalysisResult } from '../core/types';
 
 /** What the app needs from ffmpeg; the browser uses ffmpeg.wasm, the tests a stand-in. */
 export interface Engine {
   load(): Promise<void>;
   analyze(file: File): Promise<AnalysisResult>;
+  /** The finished file, and the mix as mono 16-bit samples at WAVE_RATE for its waveform. */
   render(
     plan: Plan,
     files: ReadonlyMap<string, File>,
     format: OutputFormat,
     onProgress: (progress: Progress) => void,
-  ): Promise<Blob>;
+  ): Promise<{ file: Blob; wave: Int16Array }>;
   /** Stops a render under way; it then rejects. */
   stop(): void;
 }
@@ -38,10 +41,16 @@ export interface Track {
   result: AnalysisResult | null;
 }
 
+/** Where each track plays in the finished mix, named after its file. */
+export interface MixTimeline {
+  segments: (Segment & { name: string })[];
+  crossfades: Timeline['crossfades'];
+}
+
 export type MixState =
   | { kind: 'idle' }
   | { kind: 'rendering'; progress: Progress }
-  | { kind: 'done'; blob: Blob; name: string }
+  | { kind: 'done'; blob: Blob; name: string; peaks: Peaks; timeline: MixTimeline }
   | { kind: 'failed'; logTail: string };
 
 export type EngineState = 'loading' | 'ready' | 'failed';
@@ -185,6 +194,11 @@ export class App {
     const format = FORMATS[this.#settings.format];
     const files = new Map(this.#tracks.map((t) => [t.id, t.file]));
     const names = plan.tracks.map((p) => files.get(p.id)!.name);
+    const { segments, crossfades } = timelineOf(plan);
+    const timeline: MixTimeline = {
+      segments: segments.map((s) => ({ ...s, name: files.get(s.id)!.name })),
+      crossfades,
+    };
     this.#cancelled = false;
     this.#mixState = { kind: 'rendering', progress: { ratio: 0, remaining: null } };
     this.#changed();
@@ -196,8 +210,14 @@ export class App {
         this.#changed();
       })
       .then(
-        (blob) => {
-          this.#mixState = { kind: 'done', blob, name: outputName(names, format, this.now()) };
+        ({ file, wave }) => {
+          this.#mixState = {
+            kind: 'done',
+            blob: file,
+            name: outputName(names, format, this.now()),
+            peaks: buildPeaks(wave, WAVE_RATE),
+            timeline,
+          };
         },
         (error: unknown) => {
           // A failed render carries the end of ffmpeg's log for the error details.

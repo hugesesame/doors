@@ -13,6 +13,12 @@ export class RenderError extends Error {
   }
 }
 
+export interface Rendered {
+  file: Blob;
+  /** The mix as mono 16-bit samples at WAVE_RATE, for its waveform. */
+  wave: Int16Array;
+}
+
 /** Makes the planned mix as a file; `files` holds each track's file by its id. */
 export async function render(
   ffmpeg: Ffmpeg,
@@ -20,7 +26,7 @@ export async function render(
   files: ReadonlyMap<string, File>,
   format: OutputFormat,
   onProgress: (progress: Progress) => void,
-): Promise<Blob> {
+): Promise<Rendered> {
   // Numbered names, so two files called the same cannot clash in the mount.
   const inputs = plan.tracks.map((t, i) => {
     const file = files.get(t.id);
@@ -29,15 +35,22 @@ export async function render(
   });
   const pathOf = new Map(plan.tracks.map((t, i) => [t.id, `${INPUT_DIR}/${inputs[i].name}`]));
   const output = `/mix.${format.ext}`;
+  const waveOutput = '/wave.raw';
 
   const started = performance.now();
   const onLine = (line: string) => {
     const done = timeInLine(line);
     if (done !== null) onProgress(estimateProgress(done, plan.total, (performance.now() - started) / 1000));
   };
-  const { code, log } = await ffmpeg.run(renderArgs(plan, (id) => pathOf.get(id)!, format, output), inputs, onLine);
+  const args = renderArgs(plan, (id) => pathOf.get(id)!, format, output, waveOutput);
+  const { code, log } = await ffmpeg.run(args, inputs, onLine);
   if (code !== 0) throw new RenderError(log.split('\n').slice(-LOG_TAIL_LINES).join('\n'));
 
   const data = await ffmpeg.take(output);
-  return new Blob([data as Uint8Array<ArrayBuffer>], { type: format.mime });
+  const raw = await ffmpeg.take(waveOutput);
+  return {
+    file: new Blob([data as Uint8Array<ArrayBuffer>], { type: format.mime }),
+    // A copy, so the samples start on an even byte whatever buffer ffmpeg handed back.
+    wave: new Int16Array(raw.slice().buffer, 0, Math.floor(raw.length / 2)),
+  };
 }

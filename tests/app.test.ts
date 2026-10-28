@@ -26,7 +26,7 @@ function fakeEngine() {
   const renders: {
     plan: Plan;
     onProgress: (p: Progress) => void;
-    job: ReturnType<typeof deferred<Blob>>;
+    job: ReturnType<typeof deferred<{ file: Blob; wave: Int16Array }>>;
   }[] = [];
   const load = deferred<void>();
   const engine: Engine = {
@@ -37,7 +37,7 @@ function fakeEngine() {
       return job.promise;
     }),
     render: vi.fn((plan: Plan, _files, _format, onProgress) => {
-      const job = deferred<Blob>();
+      const job = deferred<{ file: Blob; wave: Int16Array }>();
       renders.push({ plan, onProgress, job });
       return job.promise;
     }),
@@ -215,15 +215,32 @@ describe('App: mixing', () => {
     expect(app.mixState).toEqual({ kind: 'rendering', progress: { ratio: 0.5, remaining: 10 } });
 
     const blob = new Blob(['mix']);
-    renders[0].job.resolve(blob);
+    renders[0].job.resolve({ file: blob, wave: new Int16Array(2000 * 196) });
     await settle();
-    expect(app.mixState).toEqual({ kind: 'done', blob, name: 'mix-20261028-0905.mp3' });
+    expect(app.mixState).toMatchObject({ kind: 'done', name: 'mix-20261028-0905.mp3' });
+    expect(app.mixState.kind === 'done' && app.mixState.blob).toBe(blob);
+  });
+
+  it('keeps the waveform and where each track plays in the mix', async () => {
+    const { app, renders } = await analysed();
+    const [a, b] = app.tracks.map((t) => t.id);
+    app.mix();
+    renders[0].job.resolve({ file: new Blob(['mix']), wave: new Int16Array(2000 * 196) });
+    await settle();
+    const state = app.mixState;
+    if (state.kind !== 'done') throw new Error('expected a finished mix');
+    expect(state.peaks.duration).toBe(196);
+    expect(state.timeline.segments).toEqual([
+      { id: a, name: 'a.mp3', start: 0, end: 100 },
+      { id: b, name: 'b.mp3', start: 96, end: 196 },
+    ]);
+    expect(state.timeline.crossfades).toEqual([{ start: 96, end: 100 }]);
   });
 
   it('names a single track after its file', async () => {
     const { app, renders } = await analysed(['Opening.flac']);
     app.mix();
-    renders[0].job.resolve(new Blob(['x']));
+    renders[0].job.resolve({ file: new Blob(['x']), wave: new Int16Array(0) });
     await settle();
     expect(app.mixState).toMatchObject({ kind: 'done', name: 'Opening.mp3' });
   });
@@ -247,7 +264,7 @@ describe('App: mixing', () => {
     app.addFiles([file('late.mp3')]);
     await settle();
     expect(analyses).toHaveLength(2);
-    renders[0].job.resolve(new Blob(['x']));
+    renders[0].job.resolve({ file: new Blob(['x']), wave: new Int16Array(0) });
     await settle();
     expect(analyses.map((a) => a.file.name)).toEqual(['a.mp3', 'b.mp3', 'late.mp3']);
   });
@@ -273,7 +290,7 @@ describe('App: mixing', () => {
   it('clears a finished mix once the list or the settings change', async () => {
     const { app, renders } = await analysed();
     app.mix();
-    renders[0].job.resolve(new Blob(['x']));
+    renders[0].job.resolve({ file: new Blob(['x']), wave: new Int16Array(0) });
     await settle();
     app.setCrossfade(2);
     expect(app.mixState).toEqual({ kind: 'idle' });
