@@ -100,6 +100,11 @@ export class App {
     return this.#mixState.kind === 'rendering';
   }
 
+  /** One track to make a file from, so the app works as a plain converter; files that failed do not count. */
+  get single(): boolean {
+    return this.#tracks.filter((t) => t.result === null || t.result.ok).length === 1;
+  }
+
   get plan(): Plan {
     return makePlan(this.#tracks, this.#settings.crossfade);
   }

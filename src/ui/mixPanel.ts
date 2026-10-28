@@ -38,11 +38,16 @@ export function createMixPanel(app: App) {
   );
 
   const detailsLog = h('pre', { class: 'log' });
+  const details = h('details', {}, h('summary', {}, 'Details'), detailsLog);
+  // ffmpeg says what went wrong at the end of its log, so that is what opens in view.
+  details.addEventListener('toggle', () => {
+    if (details.open) detailsLog.scrollTop = detailsLog.scrollHeight;
+  });
   const failed = h(
     'div',
     { class: 'failed', hidden: true },
     h('div', { class: 'failed-text' }, 'Could not make the file.'),
-    h('details', {}, h('summary', {}, 'Details'), detailsLog),
+    details,
   );
 
   const element = h('section', { class: 'mix' }, go, note, progress, result, failed);
@@ -68,7 +73,7 @@ export function createMixPanel(app: App) {
 
   function update(): void {
     const state = app.mixState;
-    go.textContent = app.tracks.length === 1 ? 'CONVERT' : 'MIX';
+    go.textContent = app.single ? 'CONVERT' : 'MIX';
     go.disabled = !app.canMix;
     go.classList.toggle('running', state.kind === 'rendering');
     note.hidden = app.engineState !== 'loading';
@@ -80,7 +85,9 @@ export function createMixPanel(app: App) {
       progressText.textContent =
         ratio === 0
           ? 'Starting…'
-          : [`${Math.floor(ratio * 100)}%`, remaining === null ? '' : timeLeft(remaining)].filter(Boolean).join(' · ');
+          : [`${Math.floor(ratio * 100)}%`, remaining === null || remaining < 1 ? '' : timeLeft(remaining)]
+              .filter(Boolean)
+              .join(' · ');
     }
 
     result.hidden = state.kind !== 'done';

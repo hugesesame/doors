@@ -33,7 +33,7 @@ export function createSettingsPanel(app: App) {
     if (document.activeElement !== crossfade) crossfade.value = String(settings.crossfade);
     format.value = settings.format;
     crossfade.disabled = format.disabled = app.rendering;
-    crossfadeRow.hidden = app.tracks.length === 1;
+    crossfadeRow.hidden = app.single;
     tooBig.hidden = !app.tooBig;
   }
 

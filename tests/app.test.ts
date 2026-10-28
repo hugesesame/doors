@@ -151,6 +151,20 @@ describe('App: when MIX can be pressed', () => {
   });
 });
 
+describe('App: a single track', () => {
+  it('counts only the tracks that can go into the mix', async () => {
+    const { app, analyses } = await readyApp();
+    app.addFiles([file('a'), file('broken')]);
+    expect(app.single).toBe(false);
+    await settle();
+    analyses[0].job.resolve(ok());
+    await settle();
+    analyses[1].job.resolve({ ok: false, error: 'unreadable' });
+    await settle();
+    expect(app.single).toBe(true);
+  });
+});
+
 describe('App: settings', () => {
   it('starts from the saved settings', async () => {
     const { app } = await readyApp({ crossfade: 7, format: 'flac' });
