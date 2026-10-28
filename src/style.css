@@ -1,0 +1,79 @@
+:root {
+  --bg: #0b0d10;
+  --panel: #13161b;
+  --panel-raised: #1a1e25;
+  --line: #252a33;
+  --text: #e6e8eb;
+  --muted: #7d8590;
+  --accent: #4da3ff;
+  --go: #22c55e;
+  --danger: #ef4444;
+  --warn: #f59e0b;
+  --font: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', 'Segoe UI', sans-serif;
+  --mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.4 var(--font);
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: var(--panel-raised);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: #3a414d;
+  background: #222730;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+input,
+select {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+
+input:focus,
+select:focus,
+button:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 0;
+}
+
+#app {
+  height: 100vh;
+}

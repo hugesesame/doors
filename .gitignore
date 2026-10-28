@@ -1,0 +1,8 @@
+design.md
+CLAUDE.md
+.DS_Store
+refs/
+docs/
+node_modules/
+dist/
+public/ffmpeg/
