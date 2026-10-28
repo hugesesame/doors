@@ -7,6 +7,7 @@ import { enableOffline } from './offline';
 import { byId, h } from './ui/dom';
 import { installDropZone } from './ui/dropZone';
 import { createFooter } from './ui/footer';
+import { createHandheldNotice } from './ui/handheld';
 import { createHeader } from './ui/header';
 import { createHelp } from './ui/help';
 import { installKeyboard } from './ui/keyboard';
@@ -45,6 +46,10 @@ byId('app').replaceChildren(
   help.element,
   installDropZone(app),
 );
+
+// On a phone or tablet, say first that DOORS is made for a computer.
+const handheld = createHandheldNotice();
+if (handheld) document.body.append(handheld);
 
 const update = () => {
   header.update();

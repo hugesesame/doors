@@ -2,6 +2,9 @@
 
 **English** | [日本語](README.ja.md)
 
+> [!IMPORTANT]
+> **On a computer only.** DOORS runs in Chrome, Edge, Safari and Firefox on a desktop or laptop. It does not work on phones or tablets: it needs a large screen, files dropped from the computer, and enough memory to make the mix.
+
 - DOORS joins audio files into one, for background music: the music played in a venue while the doors are open, before an event starts.
 - Drop the tracks in. Each one is brought to the same loudness, the silence at its start and end is cut, and the tracks are crossfaded in list order into a single file.
 - Listen to the result on its waveform before you download it, change the order or the crossfade, and make it again.
