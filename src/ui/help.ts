@@ -1,0 +1,195 @@
+import { APP_NAME } from '../config';
+import { h } from './dom';
+
+type Lang = 'en' | 'ja';
+
+/** A section lists keys or terms with what they mean, and / or plain points. */
+type Section = { title: string; rows?: [string, string][]; points?: string[] };
+
+type Text = { title: string; close: string; switchTo: string; sections: Section[] };
+
+const LANG_KEY = 'bgm-mixer-help-lang';
+
+const HELP: Record<Lang, Text> = {
+  en: {
+    title: 'Help',
+    close: 'Close',
+    switchTo: '日本語',
+    sections: [
+      {
+        title: 'What it does',
+        points: [
+          `${APP_NAME} joins audio files into one: each track is brought to the same loudness, the silence at its start and end is cut, and the tracks are crossfaded in list order. It is made for background music, such as music played in a venue before an event.`,
+          'With a single file it works as a converter: the file is levelled and saved in the format you choose.',
+          'Everything runs in this browser. Your files are never uploaded.',
+        ],
+      },
+      {
+        title: 'How to use it',
+        points: [
+          'Drop audio files anywhere on the window, or press Add Files. Video files work too: their sound is used.',
+          'Each file is analysed in turn. Drag a row to change the order; × takes a file off the list.',
+          'Choose the crossfade and the format, then press MIX (CONVERT for a single file).',
+          'When it is done, listen to it in the player and press Download.',
+        ],
+      },
+      {
+        title: 'What happens to the sound',
+        rows: [
+          ['Loudness', 'Every track is brought to -16 LUFS. A quiet track is raised by 10 dB at most, so its noise is not raised with it.'],
+          ['Silence', 'Silence at the start and the end of a track (below -50 dB for 0.5 s or more) is cut, so there are no gaps.'],
+          ['Crossfade', '0 to 10 s, with equal-power curves so the level does not dip. Next to a short track it is shortened to half of that track.'],
+          ['Peaks', 'A limiter keeps the peaks under -1 dBTP.'],
+          ['Output', '44.1 kHz stereo: MP3 320k, WAV 16-bit, FLAC or AAC 256k (.m4a).'],
+        ],
+      },
+      {
+        title: 'Good to know',
+        points: [
+          'Files that cannot be used are shown in red and left out of the mix: files that cannot be read, files without sound, and files that are silent throughout.',
+          'The order and the settings are locked while a mix is being made. You can still add files; they are analysed when it is done. Cancel stops the mix.',
+          'A file over 1 GB (a long WAV or FLAC) may not fit in the browser’s memory. MP3 is the safe choice for long mixes.',
+          'After the first visit the app opens without a connection too.',
+          'Works in Chrome, Edge, Safari and Firefox on a computer. Not made for phones.',
+        ],
+      },
+      {
+        title: 'Keyboard',
+        rows: [
+          ['?', 'Open this help'],
+          ['Esc', 'Close it'],
+        ],
+      },
+      {
+        title: 'About',
+        points: ['Free and open source under the GPL-3.0 licence. The sound is processed by ffmpeg.wasm (FFmpeg, GPL).'],
+      },
+    ],
+  },
+  ja: {
+    title: 'ヘルプ',
+    close: '閉じる',
+    switchTo: 'English',
+    sections: [
+      {
+        title: 'できること',
+        points: [
+          `${APP_NAME} は、複数の音声ファイルを 1 本にまとめます。曲ごとに音量を揃え、頭と終わりの無音を削り、一覧の順にクロスフェードでつなぎます。イベントの開場中に流す BGM のような、背景で流す音楽づくりのためのアプリです。`,
+          'ファイルが 1 つだけのときは変換ツールとして動きます。音量を揃えて、選んだ形式で書き出します。',
+          '処理はすべてこのブラウザの中で行います。ファイルがどこかに送られることはありません。',
+        ],
+      },
+      {
+        title: '使い方',
+        points: [
+          '音声ファイルを画面のどこかにドロップするか、Add Files を押して選びます。映像ファイルも使えます（音声だけを使います）。',
+          '入れたファイルは 1 つずつ解析されます。行をドラッグすると順番を変えられます。× で一覧から外せます。',
+          'Crossfade（クロスフェードの長さ）と Format（出力形式）を選び、MIX を押します（ファイルが 1 つのときは CONVERT）。',
+          'できあがったら、プレーヤーで試聴して Download を押します。',
+        ],
+      },
+      {
+        title: '音に対して行うこと',
+        rows: [
+          ['音量', 'すべての曲を -16 LUFS に揃えます。静かな曲を上げるのは最大 10 dB までです。録音のノイズまで持ち上げないためです。'],
+          ['無音', '曲の頭と終わりにある無音（-50 dB 以下が 0.5 秒以上）を削り、曲間に間が空かないようにします。'],
+          ['クロスフェード', '0〜10 秒。重なっている間も音量がへこまない形（equal-power）でつなぎます。短い曲の前後では、その曲の長さの半分まで短くします。'],
+          ['ピーク', 'リミッターで、ピークを -1 dBTP 以下に抑えます。'],
+          ['出力', '44.1 kHz ステレオ。MP3 320k、WAV 16 bit、FLAC、AAC 256k（.m4a）から選べます。'],
+        ],
+      },
+      {
+        title: '知っておくと便利なこと',
+        points: [
+          '使えないファイルは赤字で表示され、ミックスから外されます。読めないファイル、音声が入っていないファイル、最初から最後まで無音のファイルです。',
+          'ミックスを作っている間は、曲順と設定を変えられません。ファイルの追加はでき、ミックスが終わってから解析します。Cancel で中止できます。',
+          '1 GB を超えるファイル（長い WAV や FLAC）は、ブラウザのメモリに収まらないことがあります。長いミックスは MP3 が安全です。',
+          '一度開いたあとは、ネットにつながっていなくても使えます。',
+          'PC の Chrome、Edge、Safari、Firefox で動きます。スマートフォンは対象外です。',
+        ],
+      },
+      {
+        title: 'キーボード',
+        rows: [
+          ['?', 'このヘルプを開く'],
+          ['Esc', '閉じる'],
+        ],
+      },
+      {
+        title: 'このアプリについて',
+        points: ['GPL-3.0 ライセンスの、無料のオープンソースソフトウェアです。音の処理には ffmpeg.wasm（FFmpeg、GPL）を使っています。'],
+      },
+    ],
+  },
+};
+
+function loadLang(): Lang {
+  try {
+    return localStorage.getItem(LANG_KEY) === 'ja' ? 'ja' : 'en';
+  } catch {
+    return 'en';
+  }
+}
+
+/** The help dialog: English first, with a switch to Japanese that is remembered in this browser. */
+export function createHelp() {
+  const dialog = h('dialog', { class: 'help' });
+  let lang = loadLang();
+
+  function render(): void {
+    const text = HELP[lang];
+    const switchLang = h(
+      'button',
+      {
+        type: 'button',
+        class: 'small',
+        onclick: () => {
+          lang = lang === 'en' ? 'ja' : 'en';
+          try {
+            localStorage.setItem(LANG_KEY, lang);
+          } catch {
+            // Not remembering the language is fine.
+          }
+          render();
+        },
+      },
+      text.switchTo,
+    );
+    dialog.lang = lang;
+    dialog.replaceChildren(
+      h(
+        'form',
+        { class: 'dialog-body', method: 'dialog' },
+        h('div', { class: 'help-head' }, h('h2', {}, text.title), switchLang),
+        ...text.sections.flatMap((section) => [
+          h('h3', {}, section.title),
+          section.rows
+            ? h(
+                'dl',
+                { class: 'help-rows' },
+                ...section.rows.flatMap(([key, what]) => [h('dt', {}, key), h('dd', {}, what)]),
+              )
+            : null,
+          section.points ? h('ul', { class: 'help-points' }, ...section.points.map((p) => h('li', {}, p))) : null,
+        ]),
+        h('div', { class: 'actions' }, h('button', { value: 'close' }, text.close)),
+      ),
+    );
+  }
+
+  function open(): void {
+    if (dialog.open) return;
+    render();
+    dialog.showModal();
+  }
+
+  // "?" opens the help from anywhere; Esc closes it, as any modal dialog.
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '?' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      e.preventDefault();
+      open();
+    }
+  });
+
+  return { element: dialog, open };
+}

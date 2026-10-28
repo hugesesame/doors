@@ -7,6 +7,11 @@ import { h } from './dom';
 export function createFooter(app: App) {
   const count = h('span', { class: 'count' });
   const total = h('span', { class: 'total' });
+  const offlineReady = h(
+    'span',
+    { class: 'offline-ready', hidden: true, title: 'This browser keeps a copy of the app, so it opens without a connection' },
+    'Ready offline',
+  );
 
   const element = h(
     'footer',
@@ -15,6 +20,7 @@ export function createFooter(app: App) {
     h(
       'div',
       { class: 'footer-right' },
+      offlineReady,
       h('span', { class: 'app-name' }, APP_NAME),
       h('span', { class: 'app-version' }, `v${APP_VERSION}`),
     ),
@@ -27,5 +33,5 @@ export function createFooter(app: App) {
     total.textContent = formatDuration(plan.total);
   }
 
-  return { element, update };
+  return { element, update, showOfflineReady: () => (offlineReady.hidden = false) };
 }

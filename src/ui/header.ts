@@ -2,8 +2,8 @@ import type { App } from '../app/app';
 import { APP_NAME } from '../config';
 import { h } from './dom';
 
-/** The app name, and the notice when ffmpeg could not be loaded. */
-export function createHeader(app: App) {
+/** The app name, the notice when ffmpeg could not be loaded, and the Help button. */
+export function createHeader(app: App, openHelp: () => void) {
   const banner = h(
     'div',
     { class: 'engine-banner', hidden: true },
@@ -11,7 +11,17 @@ export function createHeader(app: App) {
     h('button', { type: 'button', onclick: () => void app.retryLoad() }, 'Retry'),
   );
 
-  const element = h('header', { class: 'header' }, h('div', { class: 'brand' }, APP_NAME), banner);
+  const element = h(
+    'header',
+    { class: 'header' },
+    h('div', { class: 'brand' }, APP_NAME),
+    banner,
+    h(
+      'div',
+      { class: 'header-right' },
+      h('button', { type: 'button', class: 'small', title: 'Help (?)', onclick: openHelp }, '? Help'),
+    ),
+  );
 
   function update(): void {
     banner.hidden = app.engineState !== 'failed';

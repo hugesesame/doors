@@ -135,29 +135,6 @@ input[type='range'] {
   gap: 8px;
 }
 
-.segmented {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.segmented button {
-  border: none;
-  border-radius: 0;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-}
-
-.segmented button.active {
-  background: var(--accent);
-  color: #06121f;
-}
-
 .engine-banner {
   display: flex;
   align-items: center;
@@ -568,6 +545,11 @@ input[type='range'] {
   gap: 8px;
 }
 
+.offline-ready {
+  font-size: 11px;
+  color: var(--muted);
+}
+
 .app-name {
   color: var(--accent);
   font-size: 14px;
@@ -579,6 +561,83 @@ input[type='range'] {
 .app-version {
   color: var(--muted);
   font: 11px var(--mono);
+}
+
+/* ---- help ---- */
+
+dialog {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0;
+  user-select: text;
+  /* Scrolled by wheel or trackpad, like the lists. */
+  scrollbar-width: none;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+dialog.help {
+  width: min(640px, 92vw);
+  max-height: 86vh;
+}
+
+.dialog-body {
+  padding: 16px 20px;
+}
+
+.dialog-body h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.dialog-body h3 {
+  margin: 18px 0 8px;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+.dialog-body .actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.help-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.help-rows {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.help-rows dt {
+  font-family: var(--mono);
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.help-rows dd {
+  margin: 0;
+}
+
+.help-points {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 /* ---- drop zone ---- */
