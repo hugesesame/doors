@@ -123,7 +123,7 @@ describe('App: tracks', () => {
     await settle();
     analyses[1].job.resolve(ok(60));
     await settle();
-    expect(app.plan.total).toBe(100 + 60 - 4);
+    expect(app.plan.total).toBe(100 + 60 - 2);
   });
 });
 
@@ -173,7 +173,7 @@ describe('App: settings', () => {
 
   it('falls back to the defaults for missing or broken values', async () => {
     const { app } = await readyApp({ crossfade: 99, format: 'ogg' });
-    expect(app.settings).toEqual({ crossfade: 4, format: 'mp3' });
+    expect(app.settings).toEqual({ crossfade: 2, format: 'mp3' });
   });
 
   it('saves a change', async () => {
@@ -215,7 +215,7 @@ describe('App: mixing', () => {
     expect(app.mixState).toEqual({ kind: 'rendering', progress: { ratio: 0.5, remaining: 10 } });
 
     const blob = new Blob(['mix']);
-    renders[0].job.resolve({ file: blob, wave: new Int16Array(2000 * 196) });
+    renders[0].job.resolve({ file: blob, wave: new Int16Array(2000 * 198) });
     await settle();
     expect(app.mixState).toMatchObject({ kind: 'done', name: 'mix-20261028-0905.mp3' });
     expect(app.mixState.kind === 'done' && app.mixState.blob).toBe(blob);
@@ -225,16 +225,16 @@ describe('App: mixing', () => {
     const { app, renders } = await analysed();
     const [a, b] = app.tracks.map((t) => t.id);
     app.mix();
-    renders[0].job.resolve({ file: new Blob(['mix']), wave: new Int16Array(2000 * 196) });
+    renders[0].job.resolve({ file: new Blob(['mix']), wave: new Int16Array(2000 * 198) });
     await settle();
     const state = app.mixState;
     if (state.kind !== 'done') throw new Error('expected a finished mix');
-    expect(state.peaks.duration).toBe(196);
+    expect(state.peaks.duration).toBe(198);
     expect(state.timeline.segments).toEqual([
       { id: a, name: 'a.mp3', start: 0, end: 100 },
-      { id: b, name: 'b.mp3', start: 96, end: 196 },
+      { id: b, name: 'b.mp3', start: 98, end: 198 },
     ]);
-    expect(state.timeline.crossfades).toEqual([{ start: 96, end: 100 }]);
+    expect(state.timeline.crossfades).toEqual([{ start: 98, end: 100 }]);
   });
 
   it('names a single track after its file', async () => {
@@ -254,7 +254,7 @@ describe('App: mixing', () => {
     app.setCrossfade(8);
     app.setFormat('wav');
     expect(app.tracks.map((t) => t.id)).toEqual(ids);
-    expect(app.settings).toEqual({ crossfade: 4, format: 'mp3' });
+    expect(app.settings).toEqual({ crossfade: 2, format: 'mp3' });
     expect(app.canMix).toBe(false);
   });
 
@@ -306,7 +306,7 @@ describe('App: mixing', () => {
   it('is up to date again when the settings go back', async () => {
     const { app } = await mixed();
     app.setCrossfade(8);
-    app.setCrossfade(4);
+    app.setCrossfade(2);
     expect(app.mixOutdated).toBe(false);
   });
 
