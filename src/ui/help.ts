@@ -30,7 +30,8 @@ const HELP: Record<Lang, Text> = {
           'Drop audio files anywhere on the window, or press Add Files. Video files work too: their sound is used.',
           'Each file is analysed in turn. Drag a row to change the order; × takes a file off the list.',
           'Choose the crossfade and the format, then press MIX (CONVERT for a single file).',
-          'When it is done, listen to it in the player and press Download.',
+          'When it is done, the mix appears along the bottom with each track’s name and the crossfades. Click anywhere on it to listen from there, or click a name to hear that track from its start.',
+          'Zoom with − / + / Fit or a pinch; swipe sideways (or Shift + wheel) to scroll. Then press Download.',
         ],
       },
       {
@@ -56,6 +57,7 @@ const HELP: Record<Lang, Text> = {
       {
         title: 'Keyboard',
         rows: [
+          ['Space', 'Play / pause the finished mix'],
           ['F', 'Fullscreen on / off'],
           ['?', 'Open this help'],
           ['Esc', 'Close it'],
@@ -86,7 +88,8 @@ const HELP: Record<Lang, Text> = {
           '音声ファイルを画面のどこかにドロップするか、Add Files を押して選びます。映像ファイルも使えます（音声だけを使います）。',
           '入れたファイルは 1 つずつ解析されます。行をドラッグすると順番を変えられます。× で一覧から外せます。',
           'Crossfade（クロスフェードの長さ）と Format（出力形式）を選び、MIX を押します（ファイルが 1 つのときは CONVERT）。',
-          'できあがったら、プレーヤーで試聴して Download を押します。',
+          'できあがると、画面の下にミックスの波形が、曲名とクロスフェードの区間つきで表示されます。波形をクリックするとその位置から、曲名をクリックするとその曲の頭から再生します。',
+          '− / + / Fit またはピンチで拡大・縮小し、横スワイプ（または Shift + ホイール）でスクロールします。確認できたら Download を押します。',
         ],
       },
       {
@@ -112,6 +115,7 @@ const HELP: Record<Lang, Text> = {
       {
         title: 'キーボード',
         rows: [
+          ['Space', 'できあがったミックスの再生 / 一時停止'],
           ['F', 'フルスクリーンの切り替え'],
           ['?', 'このヘルプを開く'],
           ['Esc', '閉じる'],

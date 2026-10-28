@@ -20,6 +20,10 @@
   --hover-line: #b8bfca;
   --hover-bg: #e8ebf0;
   --backdrop: rgba(15, 18, 24, 0.35);
+  --wave: #5b86c0;
+  --marker: #1f6fd1;
+  --overlap: #9b5de5;
+  --playhead: #e5484d;
   --font: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', 'Segoe UI', sans-serif;
   --mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
   color-scheme: light;
@@ -47,6 +51,10 @@
   --hover-line: #3a414d;
   --hover-bg: #222730;
   --backdrop: rgba(0, 0, 0, 0.6);
+  --wave: #7fa3c4;
+  --marker: #0061b7;
+  --overlap: #b36bff;
+  --playhead: #ff4d4d;
   color-scheme: dark;
 }
 
@@ -179,7 +187,7 @@ input[type='range']::-moz-range-thumb {
 
 #app {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr auto auto;
   height: 100vh;
   min-width: 760px;
 }
@@ -608,6 +616,63 @@ input[type='range']::-moz-range-thumb {
   font: 11px/1.4 var(--mono);
   white-space: pre-wrap;
   user-select: text;
+}
+
+/* ---- timeline ---- */
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+}
+
+.timeline-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.timeline-bar .play {
+  width: 40px;
+}
+
+.timeline-clock {
+  font: 13px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline-zoom {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.timeline-zoom button {
+  min-width: 32px;
+}
+
+.timeline-view {
+  position: relative;
+  height: 150px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.timeline-view canvas {
+  display: block;
+}
+
+.timeline-message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  pointer-events: none;
 }
 
 /* ---- footer ---- */

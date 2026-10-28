@@ -5,9 +5,11 @@ type Theme = 'day' | 'night';
 /** Also read by the script in index.html, which sets the theme before the page is drawn. */
 const THEME_KEY = 'bgm-mixer-theme';
 
+/** Also tells what draws on a canvas (the waveform) to draw again in the new colours. */
 function apply(theme: Theme): void {
   if (theme === 'night') document.documentElement.dataset.theme = 'night';
   else delete document.documentElement.dataset.theme;
+  document.dispatchEvent(new Event('bgm-mixer-theme'));
 }
 
 /** Day / Night: Day unless Night was chosen in this browser before. */

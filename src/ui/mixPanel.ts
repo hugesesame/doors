@@ -7,7 +7,7 @@ function timeLeft(seconds: number): string {
   return `about ${time} left`;
 }
 
-/** The MIX button, the progress while it renders, then the player and the download, or what went wrong. */
+/** The MIX button, the progress while it renders, then the download (the timeline plays it), or what went wrong. */
 export function createMixPanel(app: App) {
   const go = h('button', { type: 'button', class: 'go', onclick: () => app.mix() });
   const note = h('div', { class: 'mix-note' }, 'Loading ffmpeg…');
@@ -27,13 +27,11 @@ export function createMixPanel(app: App) {
   );
 
   const doneName = h('span', { class: 'done-name' });
-  const player = h('audio', { controls: true, preload: 'metadata' });
   const download = h('a', { class: 'button primary' }, '⬇ Download');
   const result = h(
     'div',
     { class: 'result', hidden: true },
     h('div', { class: 'done' }, h('span', { class: 'done-label' }, 'Done'), doneName),
-    player,
     download,
   );
 
@@ -61,14 +59,8 @@ export function createMixPanel(app: App) {
     shownBlob = blob;
     if (url) URL.revokeObjectURL(url);
     url = blob ? URL.createObjectURL(blob) : null;
-    if (url) {
-      player.src = url;
-      download.href = url;
-    } else {
-      player.removeAttribute('src');
-      player.load();
-      download.removeAttribute('href');
-    }
+    if (url) download.href = url;
+    else download.removeAttribute('href');
   }
 
   function update(): void {

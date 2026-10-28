@@ -10,6 +10,7 @@ import { createHeader } from './ui/header';
 import { createHelp } from './ui/help';
 import { createMixPanel } from './ui/mixPanel';
 import { createSettingsPanel } from './ui/settingsPanel';
+import { createTimeline } from './ui/timeline';
 import { createTrackList } from './ui/trackList';
 
 const app = new App(createEngine(), storageSettingsStore(localStorageOrNull()), () => new Date());
@@ -19,11 +20,13 @@ const header = createHeader(app, help.open);
 const trackList = createTrackList(app);
 const settings = createSettingsPanel(app);
 const mixPanel = createMixPanel(app);
+const timeline = createTimeline(app);
 const footer = createFooter(app);
 
 byId('app').replaceChildren(
   header.element,
   h('main', { class: 'main' }, trackList.element, h('aside', { class: 'panel side' }, settings.element, mixPanel.element)),
+  timeline.element,
   footer.element,
   help.element,
   installDropZone(app),
@@ -34,6 +37,7 @@ const update = () => {
   trackList.update();
   settings.update();
   mixPanel.update();
+  timeline.update();
   footer.update();
 };
 app.onChange(update);
