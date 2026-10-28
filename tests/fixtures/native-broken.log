@@ -1,0 +1,5 @@
+[in#0 @ 0x79c3018000] Format mp3 detected only with low score of 1, misdetection possible!
+[in#0 @ 0x79c3018000] Failed to find two consecutive MPEG audio frames.
+[in#0 @ 0x79c2c10000] Error opening input: Invalid data found when processing input
+Error opening input file broken.mp3.
+Error opening input files: Invalid data found when processing input

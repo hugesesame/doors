@@ -1,0 +1,15 @@
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'video-only.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2mp41
+    encoder         : Lavf63.1.102
+  Duration: 00:00:02.00, start: 0.000000, bitrate: 109 kb/s
+  Stream #0:0[0x1](und): Video: mpeg4 (Simple Profile) (mp4v / 0x7634706D), yuv420p, 160x120 [SAR 1:1 DAR 4:3], 105 kb/s, 10 fps, 10 tbr, 10240 tbn (default)
+    Metadata:
+      handler_name    : VideoHandler
+      encoder         : Lavc63.1.102 mpeg4
+Output #0, null, to 'pipe:':
+[out#0/null @ 0x7871008600] Output file does not contain any stream
+Error opening output file -.
+Error opening output files: Invalid argument
