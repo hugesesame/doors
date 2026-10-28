@@ -3,8 +3,8 @@ import { APP_NAME, APP_VERSION } from '../config';
 import { formatDuration } from '../core/time';
 import { h } from './dom';
 
-/** How many tracks go into the mix and how long it will be; the app name and version on the right. */
-export function createFooter(app: App) {
+/** How many tracks go into the mix and how long it will be; the player in the middle; the app name and version on the right. */
+export function createFooter(app: App, transport: HTMLElement) {
   const count = h('span', { class: 'count' });
   const total = h('span', { class: 'total' });
   const offlineReady = h(
@@ -17,6 +17,7 @@ export function createFooter(app: App) {
     'footer',
     { class: 'footer' },
     h('div', { class: 'summary' }, count, h('span', { class: 'total-label' }, 'Total'), total),
+    transport,
     h(
       'div',
       { class: 'footer-right' },

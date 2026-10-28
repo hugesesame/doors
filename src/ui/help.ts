@@ -30,7 +30,8 @@ const HELP: Record<Lang, Text> = {
           'Drop audio files anywhere on the window, or press Add Files. Video files work too: their sound is used.',
           'Each file is analysed in turn. Drag a row to change the order; × takes a file off the list.',
           'Choose the crossfade and the format, then press MIX (CONVERT for a single file).',
-          'When it is done, the mix appears along the bottom with each track’s name and the crossfades. Click anywhere on it to listen from there, or click a name to hear that track from its start.',
+          'When it is done, the mix appears along the bottom with each track’s name and the crossfades. Click anywhere on it to move the playhead there (drag to scrub), or click a name to go to that track’s start; then play with ▶ or Space.',
+          'The buttons at the bottom work as in Show Tracks: go to the start, back / forward 5 s, play / stop, previous / next track.',
           'Zoom with − / + / Fit or a pinch; swipe sideways (or Shift + wheel) to scroll. Then press Download.',
         ],
       },
@@ -58,7 +59,12 @@ const HELP: Record<Lang, Text> = {
       {
         title: 'Keyboard',
         rows: [
-          ['Space', 'Play / pause the finished mix'],
+          ['Space', 'Play / stop the finished mix (it stops where it is)'],
+          ['Home', 'Go to the start'],
+          ['← / →,  ↑ / ↓', 'Previous / next track'],
+          ['⌥ ← / ⌥ →,  , / .', 'Back / forward 5 seconds'],
+          ['= / -', 'Zoom in / out'],
+          ['/,  ⇧ Z', 'Show the whole mix'],
           ['F', 'Fullscreen on / off'],
           ['?', 'Open this help'],
           ['Esc', 'Close it'],
@@ -89,7 +95,8 @@ const HELP: Record<Lang, Text> = {
           '音声ファイルを画面のどこかにドロップするか、Add Files を押して選びます。映像ファイルも使えます（音声だけを使います）。',
           '入れたファイルは 1 つずつ解析されます。行をドラッグすると順番を変えられます。× で一覧から外せます。',
           'Crossfade（クロスフェードの長さ）と Format（出力形式）を選び、MIX を押します（ファイルが 1 つのときは CONVERT）。',
-          'できあがると、画面の下にミックスの波形が、曲名とクロスフェードの区間つきで表示されます。波形をクリックするとその位置から、曲名をクリックするとその曲の頭から再生します。',
+          'できあがると、画面の下にミックスの波形が、曲名とクロスフェードの区間つきで表示されます。波形をクリックするとそこに再生位置が移り（ドラッグで動かせます）、曲名をクリックするとその曲の頭に移ります。▶ か Space で再生します。',
+          '画面下のボタンは Show Tracks と同じです。先頭へ、5 秒戻る / 進む、再生 / 停止、前 / 次の曲。',
           '− / + / Fit またはピンチで拡大・縮小し、横スワイプ（または Shift + ホイール）でスクロールします。確認できたら Download を押します。',
         ],
       },
@@ -117,7 +124,12 @@ const HELP: Record<Lang, Text> = {
       {
         title: 'キーボード',
         rows: [
-          ['Space', 'できあがったミックスの再生 / 一時停止'],
+          ['Space', 'できあがったミックスの再生 / 停止（その位置で止まります）'],
+          ['Home', '先頭へ'],
+          ['← / →,  ↑ / ↓', '前 / 次の曲へ'],
+          ['⌥ ← / ⌥ →,  , / .', '5 秒戻る / 進む'],
+          ['= / -', '拡大 / 縮小'],
+          ['/,  ⇧ Z', 'ミックス全体を表示'],
           ['F', 'フルスクリーンの切り替え'],
           ['?', 'このヘルプを開く'],
           ['Esc', '閉じる'],
@@ -191,13 +203,6 @@ export function createHelp() {
     dialog.showModal();
   }
 
-  // "?" opens the help from anywhere; Esc closes it, as any modal dialog.
-  window.addEventListener('keydown', (e) => {
-    if (e.key === '?' && !e.metaKey && !e.ctrlKey && !e.altKey) {
-      e.preventDefault();
-      open();
-    }
-  });
-
+  // "?" (ui/keyboard.ts) opens it; Esc closes it, as any modal dialog.
   return { element: dialog, open };
 }

@@ -1,4 +1,5 @@
 import type { App } from '../app/app';
+import type { Player } from '../app/player';
 import { peaksInView, type Peaks } from '../core/peaks';
 import { formatDuration } from '../core/time';
 import { h } from './dom';
@@ -10,8 +11,6 @@ const ZOOM_STEP = 1.5;
 const MIN_SECONDS_PER_PX = 0.002;
 /** While playing, the view scrolls when the playhead gets this close to the right edge. */
 const FOLLOW_EDGE = 0.95;
-/** A press that moves less than this (px) is a click. */
-const CLICK_SLOP_PX = 3;
 
 /** Ruler steps in seconds as [labelled, minor]; the first whose labels are this far apart is used. */
 const RULER_STEPS: [number, number][] = [
@@ -22,26 +21,22 @@ const RULER_LABEL_PX = 64;
 const cssVar = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
 /**
- * The finished mix along the bottom: its waveform with each track's name and the crossfades,
- * played from wherever it is clicked; zoomed with − / + / Fit or a pinch, scrolled sideways.
+ * The finished mix along the bottom: its waveform with each track's name and the crossfades.
+ * A click (or a drag) moves the playhead there, as in Show Tracks, without starting playback;
+ * a click on a name moves it to that track's start. Zoomed with − / + / Fit or a pinch, scrolled sideways.
  */
-export function createTimeline(app: App) {
-  const audio = new Audio();
-  audio.preload = 'auto';
-
-  const playButton = h('button', { type: 'button', class: 'small play', onclick: () => toggle() });
+export function createTimeline(app: App, player: Player) {
   const clock = h('span', { class: 'timeline-clock' });
   const outdated = h('span', { class: 'timeline-outdated', title: 'The tracks or settings have changed since this mix' }, 'Out of date');
-  const zoomOut = h('button', { type: 'button', class: 'small', title: 'Zoom out', onclick: () => zoomBy(1 / ZOOM_STEP) }, '−');
-  const zoomIn = h('button', { type: 'button', class: 'small', title: 'Zoom in', onclick: () => zoomBy(ZOOM_STEP) }, '+');
-  const fit = h('button', { type: 'button', class: 'small', title: 'Show the whole mix', onclick: () => zoomFit() }, 'Fit');
+  const zoomOutButton = h('button', { type: 'button', class: 'small', title: 'Zoom out (-)', onclick: () => zoomOut() }, '−');
+  const zoomInButton = h('button', { type: 'button', class: 'small', title: 'Zoom in (+)', onclick: () => zoomIn() }, '+');
+  const fitButton = h('button', { type: 'button', class: 'small', title: 'Show the whole mix (/)', onclick: () => zoomFit() }, 'Fit');
   const bar = h(
     'div',
     { class: 'timeline-bar' },
-    playButton,
     clock,
     outdated,
-    h('div', { class: 'timeline-zoom' }, zoomOut, zoomIn, fit),
+    h('div', { class: 'timeline-zoom' }, zoomOutButton, zoomInButton, fitButton),
   );
 
   const canvas = h('canvas');
@@ -57,7 +52,6 @@ export function createTimeline(app: App) {
   let zoom = 1;
   let viewStart = 0;
   let shown: Blob | null = null;
-  let url: string | null = null;
 
   const mix = () => (app.mixState.kind === 'done' ? app.mixState : null);
   const duration = () => mix()?.peaks.duration ?? 0;
@@ -73,7 +67,7 @@ export function createTimeline(app: App) {
   /** Zooms keeping `anchor` (default: the playhead, or the centre if it is off screen) in place. */
   function zoomBy(factor: number, anchor?: number): void {
     if (duration() <= 0) return;
-    let time = anchor ?? audio.currentTime;
+    let time = anchor ?? player.time;
     let x = timeToX(time);
     if (anchor === undefined && (x < 0 || x > width)) {
       x = width / 2;
@@ -85,35 +79,13 @@ export function createTimeline(app: App) {
     draw();
   }
 
+  const zoomIn = () => zoomBy(ZOOM_STEP);
+  const zoomOut = () => zoomBy(1 / ZOOM_STEP);
+
   function zoomFit(): void {
     zoom = 1;
     viewStart = 0;
     draw();
-  }
-
-  function play(at?: number): void {
-    if (!mix()) return;
-    if (at !== undefined) audio.currentTime = Math.min(Math.max(at, 0), duration());
-    void audio.play().catch(() => {});
-  }
-
-  function toggle(): void {
-    if (!mix()) return;
-    if (audio.paused) play();
-    else audio.pause();
-  }
-
-  /** A new finished mix (or none): load it into the player and show all of it. */
-  function showMix(blob: Blob | null): void {
-    if (blob === shown) return;
-    shown = blob;
-    audio.pause();
-    if (url) URL.revokeObjectURL(url);
-    url = blob ? URL.createObjectURL(blob) : null;
-    if (url) audio.src = url;
-    else audio.removeAttribute('src');
-    zoom = 1;
-    viewStart = 0;
   }
 
   function resize(): void {
@@ -131,10 +103,10 @@ export function createTimeline(app: App) {
   function draw(): void {
     if (view.clientWidth !== width || view.clientHeight !== height) resize();
     const done = mix();
-    const time = audio.currentTime;
+    const time = player.time;
 
     // Keep the playhead in view while it plays, but leave the view alone when only the user scrolled.
-    if (done && zoom > 1 && !audio.paused) {
+    if (done && zoom > 1 && player.playing) {
       const x = timeToX(time);
       if (x > width * FOLLOW_EDGE || x < 0) {
         viewStart = time - span() * (1 - FOLLOW_EDGE);
@@ -149,7 +121,6 @@ export function createTimeline(app: App) {
 
     const laneTop = LABEL_HEIGHT;
     const laneHeight = height - LABEL_HEIGHT;
-    const middle = laneTop + laneHeight / 2;
     ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
     ctx.textBaseline = 'middle';
 
@@ -162,7 +133,7 @@ export function createTimeline(app: App) {
     }
     ctx.globalAlpha = 1;
 
-    drawWave(done.peaks, laneTop, laneHeight, middle);
+    drawWave(done.peaks, laneTop, laneHeight);
     drawRuler();
 
     // Each track's start: a line down through the waveform and its name in the strip.
@@ -175,13 +146,12 @@ export function createTimeline(app: App) {
       ctx.moveTo(x, laneTop);
       ctx.lineTo(x, height);
       ctx.stroke();
-      const label = segment.name;
-      const labelWidth = ctx.measureText(label).width + 8;
+      const labelWidth = ctx.measureText(segment.name).width + 8;
       if (x + labelWidth < 0) continue;
       ctx.fillStyle = marker;
       ctx.fillRect(x, 2, labelWidth, LABEL_HEIGHT - 4);
       ctx.fillStyle = '#fff';
-      ctx.fillText(label, x + 4, LABEL_HEIGHT / 2);
+      ctx.fillText(segment.name, x + 4, LABEL_HEIGHT / 2);
     }
 
     const x = Math.round(timeToX(time)) + 0.5;
@@ -195,8 +165,9 @@ export function createTimeline(app: App) {
   }
 
   /** Mirrored around the middle of the lane, one column per pixel. */
-  function drawWave(peaks: Peaks, top: number, laneHeight: number, middle: number): void {
+  function drawWave(peaks: Peaks, top: number, laneHeight: number): void {
     const columns = peaksInView(peaks, viewStart, span() / width, Math.ceil(width));
+    const middle = top + laneHeight / 2;
     const half = laneHeight / 2 - 4;
     ctx.fillStyle = cssVar('--wave');
     for (let px = 0; px < columns.length; px++) {
@@ -233,11 +204,11 @@ export function createTimeline(app: App) {
     ctx.globalAlpha = 1;
   }
 
-  /** The track whose name label is under the pointer, so a click there plays it from its start. */
+  /** The start of the track whose name is under the pointer. */
   function labelAt(x: number, y: number): number | null {
     const done = mix();
     if (!done || y > LABEL_HEIGHT) return null;
-    // Later labels are drawn over earlier ones, so look from the last.
+    // Later names are drawn over earlier ones, so look from the last.
     for (const segment of [...done.timeline.segments].reverse()) {
       const left = timeToX(segment.start);
       if (x >= left && x <= left + ctx.measureText(segment.name).width + 8) return segment.start;
@@ -245,18 +216,24 @@ export function createTimeline(app: App) {
     return null;
   }
 
-  // A click plays from there (or from the start of the track whose name was clicked).
+  // Press to move the playhead there (or to the start of the track whose name was pressed); drag to scrub.
   view.addEventListener('pointerdown', (e) => {
     if (e.button !== 0 || !mix()) return;
-    const startX = e.clientX;
-    const up = (ev: PointerEvent) => {
+    const rect = view.getBoundingClientRect();
+    const xOf = (ev: PointerEvent) => ev.clientX - rect.left;
+    const start = labelAt(xOf(e), e.clientY - rect.top);
+    player.seek(start ?? xToTime(xOf(e)));
+    if (start !== null) return;
+    view.setPointerCapture(e.pointerId);
+    const move = (ev: PointerEvent) => player.seek(xToTime(xOf(ev)));
+    const up = () => {
+      view.removeEventListener('pointermove', move);
       view.removeEventListener('pointerup', up);
-      if (Math.abs(ev.clientX - startX) > CLICK_SLOP_PX) return;
-      const rect = view.getBoundingClientRect();
-      const x = ev.clientX - rect.left;
-      play(labelAt(x, ev.clientY - rect.top) ?? xToTime(x));
+      view.removeEventListener('pointercancel', up);
     };
+    view.addEventListener('pointermove', move);
     view.addEventListener('pointerup', up);
+    view.addEventListener('pointercancel', up);
   });
 
   // Trackpad: pinch (reported as ctrl+wheel) zooms at the pointer, a sideways swipe scrolls; so do ⌘ / Shift + wheel.
@@ -280,50 +257,40 @@ export function createTimeline(app: App) {
     { passive: false },
   );
 
-  // Space plays and pauses the finished mix. Its default is held back, so a focused button (MIX!) is not pressed too.
-  window.addEventListener('keydown', (e) => {
-    if (e.code !== 'Space' || e.repeat || document.querySelector('dialog[open]')) return;
-    if (e.target instanceof HTMLSelectElement) return;
-    if (!mix()) return;
-    e.preventDefault();
-    toggle();
-  });
-  window.addEventListener('keyup', (e) => {
-    if (e.code === 'Space' && mix() && !(e.target instanceof HTMLSelectElement)) e.preventDefault();
-  });
-
   // Redraw every frame while playing, and once on each change otherwise.
   let frame = 0;
   const tick = () => {
-    showControls();
+    showClock();
     draw();
-    frame = audio.paused ? 0 : requestAnimationFrame(tick);
+    frame = player.playing ? requestAnimationFrame(tick) : 0;
   };
-  audio.addEventListener('play', () => (frame ||= requestAnimationFrame(tick)));
-  for (const type of ['pause', 'ended', 'seeked', 'loadedmetadata']) audio.addEventListener(type, () => tick());
+  player.onChange(() => (frame ||= requestAnimationFrame(tick)));
   new ResizeObserver(() => draw()).observe(view);
   document.addEventListener('bgm-mixer-theme', () => draw());
 
-  function showControls(): void {
-    const done = mix();
-    playButton.textContent = audio.paused ? '▶' : '❚❚';
-    playButton.title = audio.paused ? 'Play (Space)' : 'Pause (Space)';
-    clock.textContent = done ? `${formatDuration(audio.currentTime)} / ${formatDuration(duration())}` : '--:-- / --:--';
-    for (const b of [playButton, zoomOut, zoomIn, fit]) b.disabled = !done;
+  function showClock(): void {
+    clock.textContent = mix() ? `${formatDuration(player.time)} / ${formatDuration(duration())}` : '--:-- / --:--';
   }
 
   function update(): void {
     const state = app.mixState;
-    showMix(state.kind === 'done' ? state.blob : null);
+    const blob = state.kind === 'done' ? state.blob : null;
+    // A new mix is shown whole.
+    if (blob !== shown) {
+      shown = blob;
+      zoom = 1;
+      viewStart = 0;
+    }
     message.hidden = state.kind === 'done';
-    outdated.hidden = !app.mixOutdated;
     message.textContent =
       state.kind === 'rendering'
         ? 'Making the mix…'
-        : 'The finished mix appears here. Click anywhere on it to listen from there.';
-    showControls();
+        : 'The finished mix appears here. Click anywhere on it to move the playhead there.';
+    outdated.hidden = !app.mixOutdated;
+    for (const b of [zoomOutButton, zoomInButton, fitButton]) b.disabled = !state || state.kind !== 'done';
+    showClock();
     draw();
   }
 
-  return { element, update };
+  return { element, update, zoom: { zoomIn, zoomOut, zoomFit } };
 }

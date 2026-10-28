@@ -7,7 +7,7 @@ export function toggleFullscreen(): void {
 }
 
 /**
- * The Fullscreen / Exit Fullscreen button; F does the same from anywhere.
+ * The Fullscreen / Exit Fullscreen button (F in ui/keyboard.ts does the same).
  * The label follows the actual state, so leaving with Esc updates it too.
  */
 export function createFullscreenButton(): HTMLButtonElement {
@@ -15,12 +15,5 @@ export function createFullscreenButton(): HTMLButtonElement {
   const show = () => (button.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Fullscreen');
   document.addEventListener('fullscreenchange', show);
   show();
-
-  window.addEventListener('keydown', (e) => {
-    if (e.code !== 'KeyF' || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
-    e.preventDefault();
-    toggleFullscreen();
-  });
-
   return button;
 }

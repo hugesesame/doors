@@ -19,6 +19,17 @@ export function h<K extends keyof HTMLElementTagNameMap>(
   return el;
 }
 
+/** True while the user is choosing in a menu or typing, so shortcuts should stay out of the way. */
+export function isEditing(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target.isContentEditable) return true;
+  if (target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) return true;
+  if (target instanceof HTMLInputElement) {
+    return !['checkbox', 'radio', 'range', 'button', 'file'].includes(target.type);
+  }
+  return false;
+}
+
 export function byId<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id);
   if (!el) throw new Error(`#${id} not found`);
