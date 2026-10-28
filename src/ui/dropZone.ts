@@ -1,11 +1,9 @@
 import type { App } from '../app/app';
-import { t } from '../i18n';
 import { h } from './dom';
 
 /** Files dropped anywhere on the window go onto the list; the window shows it takes them while they are dragged over it. */
 export function installDropZone(app: App): HTMLElement {
-  const message = h('div', { class: 'drop-message' });
-  const overlay = h('div', { class: 'drop-zone', hidden: true }, message);
+  const overlay = h('div', { class: 'drop-zone', hidden: true }, h('div', { class: 'drop-message' }, 'Drop to add to the list'));
   // dragenter / dragleave fire for every element crossed, so count them.
   let depth = 0;
   const carriesFiles = (e: DragEvent) => e.dataTransfer?.types.includes('Files') ?? false;
@@ -17,7 +15,6 @@ export function installDropZone(app: App): HTMLElement {
   window.addEventListener('dragenter', (e) => {
     if (!carriesFiles(e)) return;
     depth++;
-    message.textContent = t('dropMessage');
     overlay.hidden = false;
   });
   window.addEventListener('dragleave', (e) => {

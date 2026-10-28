@@ -2,7 +2,6 @@ import './style.css';
 import { App } from './app/app';
 import { localStorageOrNull, storageSettingsStore } from './app/settingsStore';
 import { createEngine } from './engine';
-import { onLangChange } from './i18n';
 import { byId, h } from './ui/dom';
 import { installDropZone } from './ui/dropZone';
 import { createFooter } from './ui/footer';
@@ -34,7 +33,11 @@ const update = () => {
   footer.update();
 };
 app.onChange(update);
-onLangChange(update);
 update();
+
+// Closing the tab would throw away a mix that is still being made.
+window.addEventListener('beforeunload', (e) => {
+  if (app.rendering) e.preventDefault();
+});
 
 void app.start();

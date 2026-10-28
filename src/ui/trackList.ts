@@ -1,16 +1,15 @@
 import type { App, Track } from '../app/app';
 import { formatDuration } from '../core/time';
 import type { TrackError } from '../core/types';
-import { t } from '../i18n';
 import { h } from './dom';
 
 /** A press has to move this far (px) before it turns into a drag. */
 const DRAG_START_PX = 4;
 
-const errorText: Record<TrackError, () => string> = {
-  unreadable: () => t('unreadable'),
-  'no-audio': () => t('noAudio'),
-  silent: () => t('silent'),
+const errorText: Record<TrackError, string> = {
+  unreadable: 'Cannot read this file',
+  'no-audio': 'No audio in this file',
+  silent: 'Silent throughout',
 };
 
 /** TRACKS: the files in mix order, dragged to reorder; with the Add Files button and the empty-list hint. */
@@ -20,21 +19,40 @@ export function createTrackList(app: App) {
     if (input.files) app.addFiles([...input.files]);
     input.value = '';
   });
-  const addButton = h('button', { type: 'button', class: 'small', onclick: () => input.click() });
 
-  const title = h('span');
-  const head = h('div', { class: 'track-row track-head' });
+  const head = h(
+    'div',
+    { class: 'track-row track-head' },
+    h('span'),
+    h('span', { class: 'num' }, '#'),
+    h('span', {}, 'Name'),
+    h('span', { class: 'length' }, 'Length'),
+    h('span', { class: 'loudness' }, 'Loudness'),
+    h('span'),
+  );
   const list = h('div', { class: 'track-list' });
   const dropLine = h('div', { class: 'drop-line', hidden: true });
-  const emptyTitle = h('div', { class: 'empty-title' });
-  const emptyHint = h('div', { class: 'empty-hint' });
-  const emptyAdd = h('button', { type: 'button', onclick: () => input.click() });
-  const empty = h('div', { class: 'empty' }, emptyTitle, emptyHint, emptyAdd);
+  const empty = h(
+    'div',
+    { class: 'empty' },
+    h('div', { class: 'empty-title' }, 'Drop audio files here'),
+    h(
+      'div',
+      { class: 'empty-hint' },
+      'They are levelled and crossfaded into one file, in list order. Your files stay on this computer: nothing is uploaded.',
+    ),
+    h('button', { type: 'button', onclick: () => input.click() }, 'Add Files'),
+  );
 
   const element = h(
     'section',
     { class: 'panel tracks' },
-    h('div', { class: 'panel-title' }, title, addButton),
+    h(
+      'div',
+      { class: 'panel-title' },
+      h('span', {}, 'Tracks'),
+      h('button', { type: 'button', class: 'small', onclick: () => input.click() }, '+ Add Files'),
+    ),
     head,
     list,
     input,
@@ -45,10 +63,10 @@ export function createTrackList(app: App) {
   let dirty = false;
 
   function status(track: Track): { text: string; error: boolean } {
-    if (track.result) return track.result.ok ? { text: '', error: false } : { text: errorText[track.result.error](), error: true };
+    if (track.result) return track.result.ok ? { text: '', error: false } : { text: errorText[track.result.error], error: true };
     const analysing =
       app.engineState === 'ready' && !app.rendering && app.tracks.find((tr) => tr.result === null) === track;
-    return { text: analysing ? t('analysing') : t('waiting'), error: false };
+    return { text: analysing ? 'Analysing…' : 'Waiting', error: false };
   }
 
   function row(track: Track, index: number): HTMLElement {
@@ -57,7 +75,7 @@ export function createTrackList(app: App) {
     const el = h(
       'div',
       { class: `track-row${error ? ' error' : ''}`, 'data-id': track.id },
-      h('span', { class: 'grip', title: t('dragHint') }, '⠿'),
+      h('span', { class: 'grip', title: 'Drag to reorder' }, '⠿'),
       h('span', { class: 'num' }, String(index + 1)),
       h(
         'span',
@@ -69,7 +87,13 @@ export function createTrackList(app: App) {
       h('span', { class: 'loudness' }, analysis ? `${analysis.lufs.toFixed(1)} LUFS` : ''),
       h(
         'button',
-        { type: 'button', class: 'remove', title: t('remove'), disabled: app.rendering, onclick: () => app.remove(track.id) },
+        {
+          type: 'button',
+          class: 'remove',
+          title: 'Remove from the list',
+          disabled: app.rendering,
+          onclick: () => app.remove(track.id),
+        },
         '×',
       ),
     );
@@ -130,19 +154,6 @@ export function createTrackList(app: App) {
       return;
     }
     dirty = false;
-    title.textContent = t('tracks');
-    addButton.textContent = `+ ${t('addFiles')}`;
-    emptyTitle.textContent = t('emptyTitle');
-    emptyHint.textContent = t('emptyHint');
-    emptyAdd.textContent = t('addFiles');
-    head.replaceChildren(
-      h('span'),
-      h('span', { class: 'num' }, '#'),
-      h('span', {}, t('colName')),
-      h('span', { class: 'length' }, t('colLength')),
-      h('span', { class: 'loudness' }, t('colLoudness')),
-      h('span'),
-    );
     head.hidden = app.tracks.length === 0;
     element.classList.toggle('locked', app.rendering);
     list.replaceChildren(...app.tracks.map(row), dropLine, ...(app.tracks.length ? [] : [empty]));
