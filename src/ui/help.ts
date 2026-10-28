@@ -56,6 +56,7 @@ const HELP: Record<Lang, Text> = {
       {
         title: 'Keyboard',
         rows: [
+          ['F', 'Fullscreen on / off'],
           ['?', 'Open this help'],
           ['Esc', 'Close it'],
         ],
@@ -111,6 +112,7 @@ const HELP: Record<Lang, Text> = {
       {
         title: 'キーボード',
         rows: [
+          ['F', 'フルスクリーンの切り替え'],
           ['?', 'このヘルプを開く'],
           ['Esc', '閉じる'],
         ],

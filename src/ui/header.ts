@@ -1,8 +1,9 @@
 import type { App } from '../app/app';
 import { APP_NAME } from '../config';
 import { h } from './dom';
+import { createFullscreenButton } from './fullscreen';
 
-/** The app name, the notice when ffmpeg could not be loaded, and the Help button. */
+/** The app name, the notice when ffmpeg could not be loaded, and the Fullscreen and Help buttons. */
 export function createHeader(app: App, openHelp: () => void) {
   const banner = h(
     'div',
@@ -19,6 +20,7 @@ export function createHeader(app: App, openHelp: () => void) {
     h(
       'div',
       { class: 'header-right' },
+      createFullscreenButton(),
       h('button', { type: 'button', class: 'small', title: 'Help (?)', onclick: openHelp }, '? Help'),
     ),
   );
