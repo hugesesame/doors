@@ -28,10 +28,18 @@ export function createMixPanel(app: App) {
 
   const doneName = h('span', { class: 'done-name' });
   const download = h('a', { class: 'button primary' }, '⬇ Download');
+  const outdated = h('div', { class: 'warning' }, 'Settings changed since this mix. Press MIX to make it again.');
   const result = h(
     'div',
     { class: 'result', hidden: true },
-    h('div', { class: 'done' }, h('span', { class: 'done-label' }, 'Done'), doneName),
+    h(
+      'div',
+      { class: 'done' },
+      h('span', { class: 'done-label' }, 'Done'),
+      doneName,
+      h('button', { type: 'button', class: 'small discard', title: 'Throw this mix away', onclick: () => app.discard() }, 'Discard'),
+    ),
+    outdated,
     download,
   );
 
@@ -88,6 +96,7 @@ export function createMixPanel(app: App) {
       doneName.textContent = state.name;
       download.download = state.name;
     }
+    outdated.hidden = !app.mixOutdated;
 
     failed.hidden = state.kind !== 'failed';
     if (state.kind === 'failed') detailsLog.textContent = state.logTail;

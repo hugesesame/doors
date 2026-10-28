@@ -287,10 +287,59 @@ describe('App: mixing', () => {
     expect(app.mixState).toEqual({ kind: 'failed', logTail: 'last lines' });
   });
 
-  it('clears a finished mix once the list or the settings change', async () => {
+  async function mixed() {
+    const ready = await analysed();
+    ready.app.mix();
+    ready.renders[0].job.resolve({ file: new Blob(['x']), wave: new Int16Array(0) });
+    await settle();
+    return ready;
+  }
+
+  it('keeps a finished mix when the settings change, so it can still be heard, but says it is out of date', async () => {
+    const { app } = await mixed();
+    expect(app.mixOutdated).toBe(false);
+    app.setCrossfade(8);
+    expect(app.mixState.kind).toBe('done');
+    expect(app.mixOutdated).toBe(true);
+  });
+
+  it('is up to date again when the settings go back', async () => {
+    const { app } = await mixed();
+    app.setCrossfade(8);
+    app.setCrossfade(4);
+    expect(app.mixOutdated).toBe(false);
+  });
+
+  it('counts a new order or a removed track as out of date too', async () => {
+    const { app } = await mixed();
+    app.move(1, 0);
+    expect(app.mixOutdated).toBe(true);
+    app.move(1, 0);
+    app.remove(app.tracks[0].id);
+    expect(app.mixOutdated).toBe(true);
+  });
+
+  it('can be mixed again, replacing the finished mix', async () => {
+    const { app, renders } = await mixed();
+    app.setCrossfade(8);
+    expect(app.canMix).toBe(true);
+    app.mix();
+    expect(renders[1].plan.joins).toEqual([8]);
+    renders[1].job.resolve({ file: new Blob(['y']), wave: new Int16Array(0) });
+    await settle();
+    expect(app.mixOutdated).toBe(false);
+  });
+
+  it('discards a finished mix', async () => {
+    const { app } = await mixed();
+    app.discard();
+    expect(app.mixState).toEqual({ kind: 'idle' });
+  });
+
+  it('clears a failed mix once the list or the settings change', async () => {
     const { app, renders } = await analysed();
     app.mix();
-    renders[0].job.resolve({ file: new Blob(['x']), wave: new Int16Array(0) });
+    renders[0].job.reject(new Error('broken'));
     await settle();
     app.setCrossfade(2);
     expect(app.mixState).toEqual({ kind: 'idle' });

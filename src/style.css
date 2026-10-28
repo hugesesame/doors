@@ -571,9 +571,14 @@ input[type='range']::-moz-range-thumb {
 
 .done {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   min-width: 0;
+}
+
+.done .discard {
+  flex: none;
+  margin-left: auto;
 }
 
 .done-label {
@@ -642,6 +647,15 @@ input[type='range']::-moz-range-thumb {
 .timeline-clock {
   font: 13px var(--mono);
   font-variant-numeric: tabular-nums;
+}
+
+.timeline-outdated {
+  padding: 1px 8px;
+  border: 1px solid var(--warn);
+  border-radius: 4px;
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  font-size: 11px;
 }
 
 .timeline-zoom {

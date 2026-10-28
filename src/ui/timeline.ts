@@ -31,6 +31,7 @@ export function createTimeline(app: App) {
 
   const playButton = h('button', { type: 'button', class: 'small play', onclick: () => toggle() });
   const clock = h('span', { class: 'timeline-clock' });
+  const outdated = h('span', { class: 'timeline-outdated', title: 'The tracks or settings have changed since this mix' }, 'Out of date');
   const zoomOut = h('button', { type: 'button', class: 'small', title: 'Zoom out', onclick: () => zoomBy(1 / ZOOM_STEP) }, '−');
   const zoomIn = h('button', { type: 'button', class: 'small', title: 'Zoom in', onclick: () => zoomBy(ZOOM_STEP) }, '+');
   const fit = h('button', { type: 'button', class: 'small', title: 'Show the whole mix', onclick: () => zoomFit() }, 'Fit');
@@ -39,6 +40,7 @@ export function createTimeline(app: App) {
     { class: 'timeline-bar' },
     playButton,
     clock,
+    outdated,
     h('div', { class: 'timeline-zoom' }, zoomOut, zoomIn, fit),
   );
 
@@ -314,6 +316,7 @@ export function createTimeline(app: App) {
     const state = app.mixState;
     showMix(state.kind === 'done' ? state.blob : null);
     message.hidden = state.kind === 'done';
+    outdated.hidden = !app.mixOutdated;
     message.textContent =
       state.kind === 'rendering'
         ? 'Making the mix…'

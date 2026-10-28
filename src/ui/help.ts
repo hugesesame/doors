@@ -49,6 +49,7 @@ const HELP: Record<Lang, Text> = {
         points: [
           'Files that cannot be used are shown in red and left out of the mix: files that cannot be read, files without sound, and files that are silent throughout.',
           'The order and the settings are locked while a mix is being made. You can still add files; they are analysed when it is done. Cancel stops the mix.',
+          'After listening, you can change the order or the settings (a longer crossfade, say): the finished mix stays to compare, marked Out of date, until MIX makes it again. Discard throws it away.',
           'A file over 1 GB (a long WAV or FLAC) may not fit in the browser’s memory. MP3 is the safe choice for long mixes.',
           'After the first visit the app opens without a connection too.',
           'Works in Chrome, Edge, Safari and Firefox on a computer. Not made for phones.',
@@ -107,6 +108,7 @@ const HELP: Record<Lang, Text> = {
         points: [
           '使えないファイルは赤字で表示され、ミックスから外されます。読めないファイル、音声が入っていないファイル、最初から最後まで無音のファイルです。',
           'ミックスを作っている間は、曲順と設定を変えられません。ファイルの追加はでき、ミックスが終わってから解析します。Cancel で中止できます。',
+          '聞いたあとで曲順や設定（クロスフェードを長くするなど）を変えても、できあがったミックスは聞き比べられるように残ります。Out of date と表示され、MIX を押すと作り直されます。Discard で削除できます。',
           '1 GB を超えるファイル（長い WAV や FLAC）は、ブラウザのメモリに収まらないことがあります。長いミックスは MP3 が安全です。',
           '一度開いたあとは、ネットにつながっていなくても使えます。',
           'PC の Chrome、Edge、Safari、Firefox で動きます。スマートフォンは対象外です。',

@@ -78,6 +78,8 @@ export class App {
   #engineState: EngineState = 'loading';
   #analysing = false;
   #cancelled = false;
+  /** The `#mixKey` of the mix being made or last made. */
+  #mixedKey = '';
   #nextId = 1;
   #listeners: (() => void)[] = [];
 
@@ -125,6 +127,11 @@ export class App {
       this.#tracks.every((t) => t.result !== null) &&
       this.#tracks.some((t) => t.result?.ok)
     );
+  }
+
+  /** A finished mix whose tracks, order or settings have changed since: MIX makes it again. */
+  get mixOutdated(): boolean {
+    return this.#mixState.kind === 'done' && this.#mixKey() !== this.#mixedKey;
   }
 
   /** True when the output would likely not fit in the browser's memory. */
@@ -200,6 +207,7 @@ export class App {
       crossfades,
     };
     this.#cancelled = false;
+    this.#mixedKey = this.#mixKey();
     this.#mixState = { kind: 'rendering', progress: { ratio: 0, remaining: null } };
     this.#changed();
 
@@ -233,6 +241,13 @@ export class App {
       });
   }
 
+  /** Throws the finished mix away. */
+  discard(): void {
+    if (this.#mixState.kind !== 'done') return;
+    this.#mixState = { kind: 'idle' };
+    this.#changed();
+  }
+
   cancel(): void {
     if (!this.rendering) return;
     this.#cancelled = true;
@@ -262,10 +277,18 @@ export class App {
     void this.#analyseNext();
   }
 
-  /** The list or the settings changed: a finished mix no longer matches them. */
+  /**
+   * The list or the settings changed. A finished mix stays, to be heard while adjusting,
+   * and is marked out of date (`mixOutdated`); a failed one is cleared.
+   */
   #edited(): void {
-    if (this.#mixState.kind === 'done' || this.#mixState.kind === 'failed') this.#mixState = { kind: 'idle' };
+    if (this.#mixState.kind === 'failed') this.#mixState = { kind: 'idle' };
     this.#changed();
+  }
+
+  /** What a mix is made from: equal keys make the same file. */
+  #mixKey(): string {
+    return JSON.stringify([this.plan, this.#settings.format]);
   }
 
   #changed(): void {
