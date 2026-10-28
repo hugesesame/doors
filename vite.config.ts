@@ -1,10 +1,10 @@
 import { defineConfig } from 'vitest/config';
-import { version } from './package.json';
+import pkg from './package.json' with { type: 'json' };
 
 export default defineConfig({
   base: './',
   // The version lives in package.json only; the footer shows it.
-  define: { __APP_VERSION__: JSON.stringify(version) },
+  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   // @ffmpeg/ffmpeg starts its own worker from a URL next to its module; pre-bundling would break that URL.
   optimizeDeps: { exclude: ['@ffmpeg/ffmpeg'] },
   worker: {
