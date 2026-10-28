@@ -9,6 +9,9 @@ export function installKeyboard(player: Player, zoom: ZoomControls, openHelp: ()
   window.addEventListener('keydown', (e) => {
     if (isEditing(e.target) || e.metaKey || e.ctrlKey) return;
     if (document.querySelector('dialog[open]')) return;
+    // A focused slider (the crossfade) keeps its own keys, to move in its steps.
+    const sliderKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+    if (e.target instanceof HTMLInputElement && e.target.type === 'range' && sliderKeys.includes(e.code)) return;
 
     if (e.key === '?') {
       e.preventDefault();

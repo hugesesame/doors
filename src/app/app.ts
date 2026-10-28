@@ -1,4 +1,4 @@
-import { DEFAULT_CROSSFADE_SEC, MAX_CROSSFADE_SEC, MAX_OUTPUT_BYTES, WAVE_RATE } from '../config';
+import { CROSSFADE_STEP_SEC, DEFAULT_CROSSFADE_SEC, MAX_CROSSFADE_SEC, MAX_OUTPUT_BYTES, WAVE_RATE } from '../config';
 import { outputName } from '../core/filename';
 import { DEFAULT_FORMAT, estimateBytes, FORMATS, type FormatId, type OutputFormat } from '../core/formats';
 import { buildPeaks, type Peaks } from '../core/peaks';
@@ -23,7 +23,7 @@ export interface Engine {
 }
 
 export interface Settings {
-  /** Seconds, a whole number from 0 to MAX_CROSSFADE_SEC. */
+  /** Seconds, from 0 to MAX_CROSSFADE_SEC in steps of CROSSFADE_STEP_SEC. */
   crossfade: number;
   format: FormatId;
 }
@@ -59,7 +59,10 @@ function validSettings(saved: Partial<Record<keyof Settings, unknown>>): Setting
   const { crossfade, format } = saved;
   return {
     crossfade:
-      typeof crossfade === 'number' && Number.isInteger(crossfade) && crossfade >= 0 && crossfade <= MAX_CROSSFADE_SEC
+      typeof crossfade === 'number' &&
+      Number.isInteger(crossfade / CROSSFADE_STEP_SEC) &&
+      crossfade >= 0 &&
+      crossfade <= MAX_CROSSFADE_SEC
         ? crossfade
         : DEFAULT_CROSSFADE_SEC,
     format: typeof format === 'string' && format in FORMATS ? (format as FormatId) : DEFAULT_FORMAT,

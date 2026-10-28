@@ -176,6 +176,18 @@ describe('App: settings', () => {
     expect(app.settings).toEqual({ crossfade: 2, format: 'mp3' });
   });
 
+  it('takes the crossfade in half seconds', async () => {
+    const { app } = await readyApp({ crossfade: 2.5 });
+    expect(app.settings.crossfade).toBe(2.5);
+    app.setCrossfade(0.5);
+    expect(app.settings.crossfade).toBe(0.5);
+  });
+
+  it('turns down a crossfade between half seconds', async () => {
+    const { app } = await readyApp({ crossfade: 2.3 });
+    expect(app.settings.crossfade).toBe(2);
+  });
+
   it('saves a change', async () => {
     const { app, store } = await readyApp();
     app.setCrossfade(6);

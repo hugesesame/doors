@@ -1,12 +1,12 @@
 import type { App } from '../app/app';
-import { MAX_CROSSFADE_SEC } from '../config';
+import { CROSSFADE_STEP_SEC, MAX_CROSSFADE_SEC } from '../config';
 import { FORMATS, type FormatId } from '../core/formats';
 import { h } from './dom';
 
 /** SETTINGS: the crossfade (not shown for a single track) and the output format. */
 export function createSettingsPanel(app: App) {
   const crossfadeValue = h('span', { class: 'setting-value' });
-  const crossfade = h('input', { type: 'range', min: 0, max: MAX_CROSSFADE_SEC, step: 1 });
+  const crossfade = h('input', { type: 'range', min: 0, max: MAX_CROSSFADE_SEC, step: CROSSFADE_STEP_SEC });
   crossfade.addEventListener('input', () => app.setCrossfade(Number(crossfade.value)));
   const crossfadeRow = h('label', { class: 'setting' }, h('span', { class: 'setting-label' }, 'Crossfade'), crossfade, crossfadeValue);
 
@@ -28,7 +28,7 @@ export function createSettingsPanel(app: App) {
 
   function update(): void {
     const { settings } = app;
-    crossfadeValue.textContent = `${settings.crossfade} s`;
+    crossfadeValue.textContent = `${settings.crossfade.toFixed(1)} s`;
     // Leave the slider alone while it is being dragged.
     if (document.activeElement !== crossfade) crossfade.value = String(settings.crossfade);
     crossfade.style.setProperty('--fill', `${(settings.crossfade / MAX_CROSSFADE_SEC) * 100}%`);
