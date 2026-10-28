@@ -31,6 +31,7 @@ export function createSettingsPanel(app: App) {
     crossfadeValue.textContent = `${settings.crossfade} s`;
     // Leave the slider alone while it is being dragged.
     if (document.activeElement !== crossfade) crossfade.value = String(settings.crossfade);
+    crossfade.style.setProperty('--fill', `${(settings.crossfade / MAX_CROSSFADE_SEC) * 100}%`);
     format.value = settings.format;
     crossfade.disabled = format.disabled = app.rendering;
     crossfadeRow.hidden = app.single;
