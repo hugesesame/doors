@@ -1,0 +1,36 @@
+Guessed Channel Layout for Input Stream #0.0 : mono
+Input #0, wav, from '/in/input.wav':
+  Metadata:
+    encoder         : Lavf63.1.102
+  Duration: 00:00:23.00, bitrate: 705 kb/s
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 44100 Hz, mono, s16, 705 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s16le (native) -> pcm_s16le (native))
+Output #0, null, to 'pipe:':
+  Metadata:
+    encoder         : Lavf59.27.100
+  Stream #0:0: Audio: pcm_s16le, 192000 Hz, mono, s16, 3072 kb/s
+    Metadata:
+      encoder         : Lavc59.37.100 pcm_s16le
+size=N/A time=00:00:00.00 bitrate=N/A speed=N/A    
+[silencedetect @ 0xe30bd0] silence_start: 0
+[silencedetect @ 0xe30bd0] silence_end: 1.00002 | silence_duration: 1.00002
+size=N/A time=00:00:11.90 bitrate=N/A speed=23.7x    
+[silencedetect @ 0xe30bd0] silence_start: 21
+size=N/A time=00:00:23.00 bitrate=N/A speed=24.6x    
+video:0kB audio:8625kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: unknown
+[silencedetect @ 0xe30bd0] silence_end: 23 | silence_duration: 2
+[Parsed_loudnorm_1 @ 0xe30c20] 
+{
+	"input_i" : "-25.87",
+	"input_tp" : "-22.06",
+	"input_lra" : "4.80",
+	"input_thresh" : "-35.91",
+	"output_i" : "-15.89",
+	"output_tp" : "-10.51",
+	"output_lra" : "0.90",
+	"output_thresh" : "-25.91",
+	"normalization_type" : "dynamic",
+	"target_offset" : "-0.11"
+}
+Aborted()

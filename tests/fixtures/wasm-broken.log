@@ -1,0 +1,4 @@
+[mp3 @ 0xdf38c0] Format mp3 detected only with low score of 1, misdetection possible!
+[mp3 @ 0xdf38c0] Failed to read frame size: Could not seek to 1041.
+/in/input.mp3: Invalid argument
+Aborted()
