@@ -8,7 +8,7 @@ type Section = { title: string; rows?: [string, string][]; points?: string[] };
 
 type Text = { title: string; close: string; switchTo: string; sections: Section[] };
 
-const LANG_KEY = 'bgm-mixer-help-lang';
+const LANG_KEY = 'doors-help-lang';
 
 const HELP: Record<Lang, Text> = {
   en: {

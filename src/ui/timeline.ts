@@ -266,7 +266,7 @@ export function createTimeline(app: App, player: Player) {
   };
   player.onChange(() => (frame ||= requestAnimationFrame(tick)));
   new ResizeObserver(() => draw()).observe(view);
-  document.addEventListener('bgm-mixer-theme', () => draw());
+  document.addEventListener('doors-theme', () => draw());
 
   function showClock(): void {
     clock.textContent = mix() ? `${formatDuration(player.time)} / ${formatDuration(duration())}` : '--:-- / --:--';

@@ -34,7 +34,7 @@ describe.skipIf(!hasFfmpeg)('render with the native ffmpeg', () => {
     ffmpeg(['-hide_banner', '-y', '-f', 'lavfi', '-i', args, path(name)]);
 
   beforeAll(() => {
-    dir = mkdtempSync(join(tmpdir(), 'bgm-mixer-render-'));
+    dir = mkdtempSync(join(tmpdir(), 'doors-render-'));
     // Quiet mono, with silence at both ends to cut off.
     tone('a.wav', 'sine=frequency=440:duration=20,volume=-4dB,adelay=1000:all=1,apad=pad_dur=2');
     // Loud stereo.

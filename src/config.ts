@@ -1,4 +1,4 @@
-export const APP_NAME = 'BGM Mixer';
+export const APP_NAME = 'DOORS';
 export const APP_VERSION = __APP_VERSION__;
 
 /** Every track is brought to this integrated loudness (LUFS). */

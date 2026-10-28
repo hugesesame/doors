@@ -35,7 +35,7 @@ describe('storageSettingsStore', () => {
   it('reads nothing when nothing was saved or the value is not JSON', () => {
     const storage = memoryStorage();
     expect(storageSettingsStore(storage).load()).toEqual({});
-    storage.setItem('bgm-mixer-settings', '{oops');
+    storage.setItem('doors-settings', '{oops');
     expect(storageSettingsStore(storage).load()).toEqual({});
   });
 

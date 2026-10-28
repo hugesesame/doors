@@ -1,6 +1,6 @@
 import type { Settings, SettingsStore } from './app';
 
-const KEY = 'bgm-mixer-settings';
+const KEY = 'doors-settings';
 
 /** The browser's localStorage, or null where reaching it throws (blocked site data). */
 export function localStorageOrNull(): Storage | null {

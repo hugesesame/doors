@@ -207,7 +207,8 @@ input[type='range']::-moz-range-thumb {
 .brand {
   font-weight: 800;
   letter-spacing: 0.18em;
-  font-size: 15px;
+  font-size: 26px;
+  line-height: 1;
   color: var(--accent);
   text-transform: uppercase;
 }

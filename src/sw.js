@@ -3,7 +3,7 @@
 // With a connection the page is always fetched, and the saved copy is used only when that fails.
 // Files whose names carry a hash of their content, and the ffmpeg core, come from the saved copy.
 
-const CACHE = 'bgm-mixer-__VERSION__';
+const CACHE = 'doors-__VERSION__';
 const PAGE = self.registration.scope;
 const FILES = __FILES__.map((file) => new URL(file, PAGE).href);
 const TIMEOUT_MS = 3000;
@@ -22,7 +22,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((key) => key.startsWith('bgm-mixer-') && key !== CACHE).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(keys.filter((key) => key.startsWith('doors-') && key !== CACHE).map((key) => caches.delete(key))))
       .then(() => self.clients.claim()),
   );
 });
