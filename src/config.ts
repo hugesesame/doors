@@ -13,7 +13,7 @@ export const SILENCE_MIN_SEC = 0.5;
 /** The crossfade setting (seconds): its default, its largest value, and the step it moves in. */
 export const DEFAULT_CROSSFADE_SEC = 2;
 export const MAX_CROSSFADE_SEC = 10;
-export const CROSSFADE_STEP_SEC = 0.5;
+export const CROSSFADE_STEP_SEC = 0.1;
 /** Above this many bytes the output may not fit in the browser's memory; the app suggests MP3. */
 export const MAX_OUTPUT_BYTES = 1_000_000_000;
 /** A crossfade shorter than this (seconds) is joined end to end instead. */

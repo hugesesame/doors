@@ -55,15 +55,15 @@ export type MixState =
 
 export type EngineState = 'loading' | 'ready' | 'failed';
 
+/** To the nearest step, written out exactly: 0.30000000000000004 becomes 0.3. */
+const toStep = (seconds: number) => Number((Math.round(seconds / CROSSFADE_STEP_SEC) * CROSSFADE_STEP_SEC).toFixed(1));
+
 function validSettings(saved: Partial<Record<keyof Settings, unknown>>): Settings {
   const { crossfade, format } = saved;
   return {
     crossfade:
-      typeof crossfade === 'number' &&
-      Number.isInteger(crossfade / CROSSFADE_STEP_SEC) &&
-      crossfade >= 0 &&
-      crossfade <= MAX_CROSSFADE_SEC
-        ? crossfade
+      typeof crossfade === 'number' && crossfade >= 0 && crossfade <= MAX_CROSSFADE_SEC
+        ? toStep(crossfade)
         : DEFAULT_CROSSFADE_SEC,
     format: typeof format === 'string' && format in FORMATS ? (format as FormatId) : DEFAULT_FORMAT,
   };
@@ -184,9 +184,11 @@ export class App {
     this.#edited();
   }
 
+  /** Typed or slid: kept between 0 and MAX_CROSSFADE_SEC and rounded to the step; not a number, ignored. */
   setCrossfade(seconds: number): void {
-    if (this.rendering) return;
-    this.#settings = validSettings({ ...this.#settings, crossfade: seconds });
+    if (this.rendering || !Number.isFinite(seconds)) return;
+    const crossfade = Math.min(Math.max(seconds, 0), MAX_CROSSFADE_SEC);
+    this.#settings = validSettings({ ...this.#settings, crossfade });
     this.store.save(this.#settings);
     this.#edited();
   }

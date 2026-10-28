@@ -176,16 +176,33 @@ describe('App: settings', () => {
     expect(app.settings).toEqual({ crossfade: 2, format: 'mp3' });
   });
 
-  it('takes the crossfade in half seconds', async () => {
-    const { app } = await readyApp({ crossfade: 2.5 });
-    expect(app.settings.crossfade).toBe(2.5);
-    app.setCrossfade(0.5);
-    expect(app.settings.crossfade).toBe(0.5);
+  it('takes the crossfade in tenths of a second', async () => {
+    const { app } = await readyApp({ crossfade: 2.3 });
+    expect(app.settings.crossfade).toBe(2.3);
+    // 0.1 + 0.2 is 0.30000000000000004 in floating point; the setting comes out as 0.3.
+    app.setCrossfade(0.1 + 0.2);
+    expect(app.settings.crossfade).toBe(0.3);
   });
 
-  it('turns down a crossfade between half seconds', async () => {
-    const { app } = await readyApp({ crossfade: 2.3 });
-    expect(app.settings.crossfade).toBe(2);
+  it('rounds a typed crossfade to a tenth and keeps it between 0 and 10 s', async () => {
+    const { app } = await readyApp();
+    app.setCrossfade(2.37);
+    expect(app.settings.crossfade).toBe(2.4);
+    app.setCrossfade(12);
+    expect(app.settings.crossfade).toBe(10);
+    app.setCrossfade(-1);
+    expect(app.settings.crossfade).toBe(0);
+  });
+
+  it('ignores a typed crossfade that is not a number', async () => {
+    const { app } = await readyApp({ crossfade: 3 });
+    app.setCrossfade(Number.NaN);
+    expect(app.settings.crossfade).toBe(3);
+  });
+
+  it('rounds a saved crossfade to a tenth', async () => {
+    const { app } = await readyApp({ crossfade: 2.34 });
+    expect(app.settings.crossfade).toBe(2.3);
   });
 
   it('saves a change', async () => {

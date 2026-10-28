@@ -5,10 +5,32 @@ import { h } from './dom';
 
 /** SETTINGS: the crossfade (not shown for a single track) and the output format. */
 export function createSettingsPanel(app: App) {
-  const crossfadeValue = h('span', { class: 'setting-value' });
   const crossfade = h('input', { type: 'range', min: 0, max: MAX_CROSSFADE_SEC, step: CROSSFADE_STEP_SEC });
   crossfade.addEventListener('input', () => app.setCrossfade(Number(crossfade.value)));
-  const crossfadeRow = h('label', { class: 'setting' }, h('span', { class: 'setting-label' }, 'Crossfade'), crossfade, crossfadeValue);
+  // The exact value can be typed too; it is taken on Enter or on leaving the field.
+  const crossfadeValue = h('input', {
+    type: 'number',
+    class: 'setting-number',
+    min: 0,
+    max: MAX_CROSSFADE_SEC,
+    step: CROSSFADE_STEP_SEC,
+    title: 'Crossfade in seconds',
+  });
+  crossfadeValue.addEventListener('change', () => {
+    app.setCrossfade(crossfadeValue.value === '' ? Number.NaN : Number(crossfadeValue.value));
+    // Shows what was taken: rounded, kept in range, or back to the setting if it was not a number.
+    crossfadeValue.value = app.settings.crossfade.toFixed(1);
+  });
+  crossfadeValue.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') crossfadeValue.blur();
+  });
+  const crossfadeRow = h(
+    'div',
+    { class: 'setting' },
+    h('span', { class: 'setting-label' }, 'Crossfade'),
+    crossfade,
+    h('span', { class: 'setting-value' }, crossfadeValue, h('span', { class: 'unit' }, 's')),
+  );
 
   const format = h(
     'select',
@@ -28,12 +50,12 @@ export function createSettingsPanel(app: App) {
 
   function update(): void {
     const { settings } = app;
-    crossfadeValue.textContent = `${settings.crossfade.toFixed(1)} s`;
-    // Leave the slider alone while it is being dragged.
+    // Leave the slider and the field alone while they are being used.
+    if (document.activeElement !== crossfadeValue) crossfadeValue.value = settings.crossfade.toFixed(1);
     if (document.activeElement !== crossfade) crossfade.value = String(settings.crossfade);
     crossfade.style.setProperty('--fill', `${(settings.crossfade / MAX_CROSSFADE_SEC) * 100}%`);
     format.value = settings.format;
-    crossfade.disabled = format.disabled = app.rendering;
+    crossfade.disabled = crossfadeValue.disabled = format.disabled = app.rendering;
     crossfadeRow.hidden = app.single;
     tooBig.hidden = !app.tooBig;
   }
