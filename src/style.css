@@ -154,6 +154,7 @@ input[type='range']::-moz-range-thumb {
   display: flex;
   align-items: center;
   gap: 16px;
+  min-height: 69px;
   padding: 10px 16px;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
@@ -557,7 +558,6 @@ input[type='range']::-moz-range-thumb {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 60px;
   padding: 8px 16px;
   background: var(--panel);
   border-top: 1px solid var(--line);
