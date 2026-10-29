@@ -22,7 +22,11 @@ const ok = (duration = 100, lufs = -16): AnalysisResult => ({
 
 /** An engine whose analyses and renders finish only when the test says so. */
 function fakeEngine() {
-  const analyses: { file: File; job: ReturnType<typeof deferred<AnalysisResult>> }[] = [];
+  const analyses: {
+    file: File;
+    onProgress: (ratio: number | null) => void;
+    job: ReturnType<typeof deferred<AnalysisResult>>;
+  }[] = [];
   const renders: {
     plan: Plan;
     onProgress: (p: Progress) => void;
@@ -31,9 +35,9 @@ function fakeEngine() {
   const load = deferred<void>();
   const engine: Engine = {
     load: vi.fn(() => load.promise),
-    analyze: vi.fn((file: File) => {
+    analyze: vi.fn((file: File, onProgress: (ratio: number | null) => void) => {
       const job = deferred<AnalysisResult>();
-      analyses.push({ file, job });
+      analyses.push({ file, onProgress, job });
       return job.promise;
     }),
     render: vi.fn((plan: Plan, _files, _format, onProgress) => {
@@ -124,6 +128,51 @@ describe('App: tracks', () => {
     analyses[1].job.resolve(ok(60));
     await settle();
     expect(app.plan.total).toBe(100 + 60 - 1);
+  });
+});
+
+describe('App: analysis progress', () => {
+  it('tells how far the track being analysed has got', async () => {
+    const { app, analyses } = await readyApp();
+    app.addFiles([file('a'), file('b')]);
+    const [a, b] = app.tracks.map((t) => t.id);
+    await settle();
+    expect(app.analysing).toEqual({ id: a, ratio: 0 });
+    analyses[0].onProgress(0.42);
+    expect(app.analysing).toEqual({ id: a, ratio: 0.42 });
+
+    analyses[0].job.resolve(ok());
+    await settle();
+    expect(app.analysing).toEqual({ id: b, ratio: 0 });
+    // A file whose length ffmpeg cannot tell.
+    analyses[1].onProgress(null);
+    expect(app.analysing).toEqual({ id: b, ratio: null });
+
+    analyses[1].job.resolve(ok());
+    await settle();
+    expect(app.analysing).toBeNull();
+  });
+
+  it('tells listeners only when the percentage shown changes', async () => {
+    const { app, analyses } = await readyApp();
+    app.addFiles([file('a')]);
+    await settle();
+    const listener = vi.fn();
+    app.onChange(listener);
+    analyses[0].onProgress(0.421);
+    analyses[0].onProgress(0.424);
+    expect(listener).toHaveBeenCalledTimes(1);
+    analyses[0].onProgress(0.43);
+    expect(listener).toHaveBeenCalledTimes(2);
+  });
+
+  it('is not analysing before ffmpeg is ready', async () => {
+    const fake = fakeEngine();
+    const app = new App(fake.engine, memoryStore(), () => new Date());
+    void app.start();
+    app.addFiles([file('a')]);
+    await settle();
+    expect(app.analysing).toBeNull();
   });
 });
 

@@ -17,7 +17,7 @@
 
 ## What it does
 
-- **Drop and go**: drop audio files anywhere on the window, or press **Add Files**. Video files work too: their sound is used. Each file is analysed in turn as it comes.
+- **Drop and go**: drop audio files anywhere on the window, or press **Add Files**. Video files work too: their sound is used. Each file is analysed in turn as it comes, with its progress shown on its row.
 - **Even loudness**: every track is brought to -16 LUFS, so no track suddenly jumps out. A quiet track is raised by 10 dB at most, so its noise is not raised with it, and a limiter keeps the peaks under -1 dBTP.
 - **No gaps**: silence at the start and the end of each track is cut.
 - **Crossfades** from 0 to 10 s in steps of 0.1 s (slide, or type the value), with equal-power curves so the level does not dip. Next to a short track the crossfade is shortened to half of that track. The same crossfade is used between every pair of tracks: it cannot be set track by track.

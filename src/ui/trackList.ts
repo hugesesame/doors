@@ -62,16 +62,21 @@ export function createTrackList(app: App) {
   // A change that arrives mid-drag would rebuild the row being dragged; it waits for the drop.
   let dirty = false;
 
-  function status(track: Track): { text: string; error: boolean } {
+  /** What a row says about its track; `progress` is set while it is being analysed (null: length unknown). */
+  function status(track: Track): { text: string; error: boolean; progress?: number | null } {
     if (track.result) return track.result.ok ? { text: '', error: false } : { text: errorText[track.result.error], error: true };
+    // Nothing is analysed until ffmpeg has been fetched, which takes a moment on the first visit.
+    if (app.engineState === 'loading') return { text: 'Loading engine…', error: false };
     const analysing =
       app.engineState === 'ready' && !app.rendering && app.tracks.find((tr) => tr.result === null) === track;
-    return { text: analysing ? 'Analysing…' : 'Waiting', error: false };
+    if (!analysing) return { text: 'Waiting', error: false };
+    const progress = app.analysing?.id === track.id ? app.analysing.ratio : 0;
+    return { text: progress === null ? 'Analysing…' : `Analysing ${Math.floor(progress * 100)}%`, error: false, progress };
   }
 
   function row(track: Track, index: number): HTMLElement {
     const analysis = track.result?.ok ? track.result.analysis : null;
-    const { text, error } = status(track);
+    const { text, error, progress } = status(track);
     const el = h(
       'div',
       { class: `track-row${error ? ' error' : ''}`, 'data-id': track.id },
@@ -85,6 +90,13 @@ export function createTrackList(app: App) {
       ),
       h('span', { class: 'length' }, analysis ? formatDuration(analysis.duration) : ''),
       h('span', { class: 'loudness' }, analysis ? `${analysis.lufs.toFixed(1)} LUFS` : ''),
+      // A line along the foot of the row fills up as it is analysed; one of unknown length gets a moving one.
+      progress === undefined
+        ? null
+        : h('span', {
+            class: `analysis-bar${progress === null ? ' unknown' : ''}`,
+            style: progress === null ? '' : `width: ${progress * 100}%`,
+          }),
       h(
         'button',
         {

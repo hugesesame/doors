@@ -10,7 +10,8 @@ import type { AnalysisResult } from '../core/types';
 /** What the app needs from ffmpeg; the browser uses ffmpeg.wasm, the tests a stand-in. */
 export interface Engine {
   load(): Promise<void>;
-  analyze(file: File): Promise<AnalysisResult>;
+  /** `onProgress` gets the share of the file read so far, or null when its length is unknown. */
+  analyze(file: File, onProgress: (ratio: number | null) => void): Promise<AnalysisResult>;
   /** The finished file, and the mix as mono 16-bit samples at WAVE_RATE for its waveform. */
   render(
     plan: Plan,
@@ -57,6 +58,12 @@ export type MixState =
 
 export type EngineState = 'loading' | 'ready' | 'failed';
 
+/** The track being analysed and the share of it read so far; null when its length is unknown. */
+export interface Analysing {
+  id: string;
+  ratio: number | null;
+}
+
 /** To the nearest step, written out exactly: 0.30000000000000004 becomes 0.3. */
 const toStep = (seconds: number) => Number((Math.round(seconds / CROSSFADE_STEP_SEC) * CROSSFADE_STEP_SEC).toFixed(1));
 
@@ -82,7 +89,7 @@ export class App {
   #settings: Settings;
   #mixState: MixState = { kind: 'idle' };
   #engineState: EngineState = 'loading';
-  #analysing = false;
+  #analysing: Analysing | null = null;
   #cancelled = false;
   /** The `#mixKey` of the mix being made or last made. */
   #mixedKey = '';
@@ -111,6 +118,10 @@ export class App {
 
   get engineState(): EngineState {
     return this.#engineState;
+  }
+
+  get analysing(): Analysing | null {
+    return this.#analysing;
   }
 
   get rendering(): boolean {
@@ -274,9 +285,10 @@ export class App {
     if (this.#analysing || this.#engineState !== 'ready' || this.rendering) return;
     const track = this.#tracks.find((t) => t.result === null);
     if (!track) return;
-    this.#analysing = true;
+    this.#analysing = { id: track.id, ratio: 0 };
     try {
-      const result = await this.engine.analyze(track.file);
+      const result = await this.engine.analyze(track.file, (ratio) => this.#analysed(ratio));
+      this.#analysing = null;
       // The track may have been taken off the list meanwhile.
       if (this.#tracks.includes(track)) {
         track.result = result;
@@ -284,13 +296,21 @@ export class App {
       }
     } catch {
       // ffmpeg itself failed, not the file: the track waits until it is loaded again.
+      this.#analysing = null;
       this.#engineState = 'failed';
       this.#changed();
       return;
-    } finally {
-      this.#analysing = false;
     }
     void this.#analyseNext();
+  }
+
+  /** Progress on the track being analysed; listeners hear of it only when the whole percentage shown changes. */
+  #analysed(ratio: number | null): void {
+    const before = this.#analysing;
+    if (!before) return;
+    const percent = (r: number | null) => (r === null ? null : Math.floor(r * 100));
+    this.#analysing = { id: before.id, ratio };
+    if (percent(ratio) !== percent(before.ratio)) this.#changed();
   }
 
   /**

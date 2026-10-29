@@ -10,7 +10,7 @@ export function createEngine(): Engine {
     load: async () => {
       await ffmpeg.load();
     },
-    analyze: (file) => analyzeFile(ffmpeg, file),
+    analyze: (file, onProgress) => analyzeFile(ffmpeg, file, onProgress),
     render: (plan, files, format, onProgress) => render(ffmpeg, plan, files, format, onProgress),
     stop: () => ffmpeg.stop(),
   };

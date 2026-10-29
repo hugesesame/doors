@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { estimateProgress, timeInLine } from '../src/core/progress';
+import { durationInLine, estimateProgress, timeInLine } from '../src/core/progress';
 
 describe('timeInLine', () => {
   it('reads how far ffmpeg has got from a progress line', () => {
@@ -9,6 +9,17 @@ describe('timeInLine', () => {
   it('ignores lines without a time', () => {
     expect(timeInLine('[out#0/mp3 @ 0x1] video:0KiB audio:3750KiB')).toBeNull();
     expect(timeInLine('size=N/A time=N/A bitrate=N/A')).toBeNull();
+  });
+});
+
+describe('durationInLine', () => {
+  it('reads the length of the input from its header line', () => {
+    expect(durationInLine('  Duration: 00:03:21.45, start: 0.025057, bitrate: 128 kb/s')).toBe(201.45);
+  });
+
+  it('ignores other lines and an unknown length', () => {
+    expect(durationInLine('size=N/A time=00:00:06.10 bitrate=N/A speed=11.2x')).toBeNull();
+    expect(durationInLine('  Duration: N/A, start: 0.000000, bitrate: N/A')).toBeNull();
   });
 });
 

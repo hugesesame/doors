@@ -299,6 +299,7 @@ input[type='range']::-moz-range-thumb {
 }
 
 .track-row {
+  position: relative;
   display: grid;
   grid-template-columns: 20px 32px minmax(0, 1fr) 80px 110px 32px;
   align-items: center;
@@ -366,7 +367,30 @@ input[type='range']::-moz-range-thumb {
 .track-row .status {
   flex: none;
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
   color: var(--muted);
+}
+
+.track-row .analysis-bar {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 3px;
+  background: var(--accent);
+}
+
+.track-row .analysis-bar.unknown {
+  width: 30%;
+  animation: analysis-unknown 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes analysis-unknown {
+  from {
+    left: 0;
+  }
+  to {
+    left: 70%;
+  }
 }
 
 .track-row.error .file {

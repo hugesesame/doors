@@ -28,7 +28,7 @@ const HELP: Record<Lang, Text> = {
         title: 'How to use it',
         points: [
           'Drop audio files anywhere on the window, or press Add Files. Video files work too: their sound is used.',
-          'Each file is analysed in turn. Drag a row to change the order; × takes a file off the list.',
+          'Each file is analysed in turn, with a line along its row showing how far it has got. Drag a row to change the order; × takes a file off the list.',
           'Choose the crossfade, Loop if the file is to repeat, and the format, then press MIX (CONVERT for a single file).',
           'When it is done, the mix appears along the bottom with each track’s name and the crossfades. Click anywhere on it to move the playhead there (drag to scrub), or click a name to go to that track’s start; then play with ▶ or Space.',
           'The buttons at the bottom work as in Show Tracks: go to the start, back / forward 5 s, play / stop, previous / next track.',
@@ -106,7 +106,7 @@ const HELP: Record<Lang, Text> = {
         title: '使い方',
         points: [
           '音声ファイルを画面のどこかにドロップするか、Add Files を押して選びます。映像ファイルも使えます（音声だけを使います）。',
-          '入れたファイルは 1 つずつ解析されます。行をドラッグすると順番を変えられます。× で一覧から外せます。',
+          '入れたファイルは 1 つずつ解析されます。解析中の行には、進み具合が % と下の線で表示されます。行をドラッグすると順番を変えられます。× で一覧から外せます。',
           'Crossfade（クロスフェードの長さ）、Loop（繰り返し再生用にするか）、Format（出力形式）を選び、MIX を押します（ファイルが 1 つのときは CONVERT）。',
           'できあがると、画面の下にミックスの波形が、曲名とクロスフェードの区間つきで表示されます。波形をクリックするとそこに再生位置が移り（ドラッグで動かせます）、曲名をクリックするとその曲の頭に移ります。▶ か Space で再生します。',
           '画面下のボタンは Show Tracks と同じです。先頭へ、5 秒戻る / 進む、再生 / 停止、前 / 次の曲。',

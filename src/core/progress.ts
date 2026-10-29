@@ -9,6 +9,12 @@ export function timeInLine(line: string): number | null {
   return match ? parseTimestamp(match[1]) : null;
 }
 
+/** The length (seconds) of the input that an ffmpeg header line gives, or null. */
+export function durationInLine(line: string): number | null {
+  const match = /^\s*Duration: ([^,]+),/.exec(line);
+  return match ? parseTimestamp(match[1]) : null;
+}
+
 export interface Progress {
   /** Share done, 0 to 1. */
   ratio: number;
