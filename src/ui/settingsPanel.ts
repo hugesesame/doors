@@ -3,7 +3,7 @@ import { CROSSFADE_STEP_SEC, MAX_CROSSFADE_SEC } from '../config';
 import { FORMATS, type FormatId } from '../core/formats';
 import { h } from './dom';
 
-/** SETTINGS: the crossfade (not shown for a single track) and the output format. */
+/** SETTINGS: the crossfade (for a single track, only with Loop), Loop and the output format. */
 export function createSettingsPanel(app: App) {
   /** One length for every join: there is no per-track crossfade, and the tooltips say so. */
   const crossfadeHint = 'One crossfade for every join between tracks';
@@ -40,6 +40,16 @@ export function createSettingsPanel(app: App) {
     h('span', { class: 'setting-value' }, crossfadeValue, h('span', { class: 'unit' }, 's')),
   );
 
+  const loopHint = 'End with a crossfade back into the start, so the file repeats without a break';
+  const loop = h('input', { type: 'checkbox', title: loopHint });
+  loop.addEventListener('change', () => app.setLoop(loop.checked));
+  const loopRow = h(
+    'label',
+    { class: 'setting', title: loopHint },
+    h('span', { class: 'setting-label' }, 'Loop'),
+    h('span', { class: 'setting-check' }, loop, h('span', { class: 'setting-hint' }, 'The end fades into the start')),
+  );
+
   const format = h(
     'select',
     {},
@@ -53,7 +63,7 @@ export function createSettingsPanel(app: App) {
     'section',
     { class: 'settings' },
     h('div', { class: 'panel-title' }, 'Settings'),
-    h('div', { class: 'settings-body' }, crossfadeRow, formatRow, tooBig),
+    h('div', { class: 'settings-body' }, crossfadeRow, loopRow, formatRow, tooBig),
   );
 
   function update(): void {
@@ -63,8 +73,10 @@ export function createSettingsPanel(app: App) {
     if (document.activeElement !== crossfade) crossfade.value = String(settings.crossfade);
     crossfade.style.setProperty('--fill', `${(settings.crossfade / MAX_CROSSFADE_SEC) * 100}%`);
     format.value = settings.format;
-    crossfade.disabled = crossfadeValue.disabled = format.disabled = app.rendering;
-    crossfadeRow.hidden = app.single;
+    loop.checked = settings.loop;
+    crossfade.disabled = crossfadeValue.disabled = loop.disabled = format.disabled = app.rendering;
+    // A single track has nothing to crossfade into, except its own start when it loops.
+    crossfadeRow.hidden = app.single && !settings.loop;
     tooBig.hidden = !app.tooBig;
   }
 

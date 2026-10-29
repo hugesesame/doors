@@ -18,4 +18,9 @@ describe('outputName', () => {
     expect(outputName(['recording'], FORMATS.wav, at)).toBe('recording.wav');
     expect(outputName(['.hidden'], FORMATS.wav, at)).toBe('.hidden.wav');
   });
+
+  it('ends the name of a looping file with -loop', () => {
+    expect(outputName(['a.wav', 'b.mp3'], FORMATS.mp3, at, true)).toBe('mix-20261028-0905-loop.mp3');
+    expect(outputName(['Opening Theme.flac'], FORMATS.wav, at, true)).toBe('Opening Theme-loop.wav');
+  });
 });

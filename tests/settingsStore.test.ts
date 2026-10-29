@@ -28,8 +28,8 @@ const broken = (): Storage => ({
 describe('storageSettingsStore', () => {
   it('reads back what it saved', () => {
     const store = storageSettingsStore(memoryStorage());
-    store.save({ crossfade: 6, format: 'flac' });
-    expect(store.load()).toEqual({ crossfade: 6, format: 'flac' });
+    store.save({ crossfade: 6, format: 'flac', loop: true });
+    expect(store.load()).toEqual({ crossfade: 6, format: 'flac', loop: true });
   });
 
   it('reads nothing when nothing was saved or the value is not JSON', () => {
@@ -42,7 +42,7 @@ describe('storageSettingsStore', () => {
   it('works without storage at all', () => {
     for (const storage of [broken(), null]) {
       const store = storageSettingsStore(storage);
-      expect(() => store.save({ crossfade: 6, format: 'flac' })).not.toThrow();
+      expect(() => store.save({ crossfade: 6, format: 'flac', loop: true })).not.toThrow();
       expect(store.load()).toEqual({});
     }
   });

@@ -26,22 +26,37 @@ export function renderArgs(
       `aresample=${SAMPLE_RATE},aformat=sample_fmts=fltp:channel_layouts=stereo,volume=${decibels(t.gainDb)}dB[a${i}]`,
   );
 
-  // Then joined one after another: equal-power curves keep the level up through a crossfade.
+  // With Loop the first track is cut in two: the mix starts after its head and ends crossfading into it.
   let mixed = 'a0';
-  plan.joins.forEach((fade, i) => {
+  if (plan.loop > 0) {
+    const loop = seconds(plan.loop);
+    graph.push(
+      '[a0]asplit=2[b0][h0]',
+      `[b0]atrim=start=${loop},asetpts=PTS-STARTPTS[s0]`,
+      `[h0]atrim=end=${loop},asetpts=PTS-STARTPTS[e0]`,
+    );
+    mixed = 's0';
+  }
+
+  // Then joined one after another: equal-power curves keep the level up through a crossfade.
+  const next = plan.tracks.slice(1).map((_, i) => ({ input: `a${i + 1}`, fade: plan.joins[i] }));
+  if (plan.loop > 0) next.push({ input: 'e0', fade: plan.loop });
+  next.forEach(({ input, fade }, i) => {
     const out = `x${i + 1}`;
     graph.push(
       fade > 0
-        ? `[${mixed}][a${i + 1}]acrossfade=d=${seconds(fade)}:c1=qsin:c2=qsin[${out}]`
-        : `[${mixed}][a${i + 1}]concat=n=2:v=0:a=1[${out}]`,
+        ? `[${mixed}][${input}]acrossfade=d=${seconds(fade)}:c1=qsin:c2=qsin[${out}]`
+        : `[${mixed}][${input}]concat=n=2:v=0:a=1[${out}]`,
     );
     mixed = out;
   });
 
   // Raising a quiet track can push its peaks over full scale; the limiter catches them.
+  // It looks ahead by delaying the sound; latency=1 takes that delay back out, or the file
+  // would start with a few milliseconds of silence and lose as much at the end (a click in a loop).
   // A small copy of the result is all the waveform needs, made in the same pass.
   const limit = (10 ** (LIMIT_DB / 20)).toFixed(4);
-  graph.push(`[${mixed}]alimiter=limit=${limit}:level=disabled,asplit=2[out][w]`);
+  graph.push(`[${mixed}]alimiter=limit=${limit}:level=disabled:latency=1,asplit=2[out][w]`);
   graph.push(`[w]aformat=channel_layouts=mono,aresample=${WAVE_RATE}[wave]`);
 
   return [

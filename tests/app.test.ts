@@ -46,7 +46,7 @@ function fakeEngine() {
   return { engine, analyses, renders, load };
 }
 
-function memoryStore(saved: Partial<{ crossfade: number; format: string }> = {}) {
+function memoryStore(saved: Partial<{ crossfade: number; format: string; loop: unknown }> = {}) {
   const store: SettingsStore & { saved: unknown } = {
     saved,
     load: () => saved as never,
@@ -167,13 +167,13 @@ describe('App: a single track', () => {
 
 describe('App: settings', () => {
   it('starts from the saved settings', async () => {
-    const { app } = await readyApp({ crossfade: 7, format: 'flac' });
-    expect(app.settings).toEqual({ crossfade: 7, format: 'flac' });
+    const { app } = await readyApp({ crossfade: 7, format: 'flac', loop: true });
+    expect(app.settings).toEqual({ crossfade: 7, format: 'flac', loop: true });
   });
 
   it('falls back to the defaults for missing or broken values', async () => {
-    const { app } = await readyApp({ crossfade: 99, format: 'ogg' });
-    expect(app.settings).toEqual({ crossfade: 1, format: 'mp3' });
+    const { app } = await readyApp({ crossfade: 99, format: 'ogg', loop: 'yes' });
+    expect(app.settings).toEqual({ crossfade: 1, format: 'mp3', loop: false });
   });
 
   it('takes the crossfade in tenths of a second', async () => {
@@ -209,7 +209,8 @@ describe('App: settings', () => {
     const { app, store } = await readyApp();
     app.setCrossfade(6);
     app.setFormat('wav');
-    expect(store.saved).toEqual({ crossfade: 6, format: 'wav' });
+    app.setLoop(true);
+    expect(store.saved).toEqual({ crossfade: 6, format: 'wav', loop: true });
   });
 
   it('warns when the output would pass 1 GB', async () => {
@@ -284,6 +285,25 @@ describe('App: mixing', () => {
     expect(app.mixState).toMatchObject({ kind: 'done', name: 'Opening.mp3' });
   });
 
+  it('with Loop, plans the loop, lays it out and ends the name in -loop', async () => {
+    const { app, renders } = await analysed();
+    const [a, b] = app.tracks.map((t) => t.id);
+    app.setLoop(true);
+    expect(app.plan.loop).toBe(1);
+    app.mix();
+    expect(renders[0].plan.loop).toBe(1);
+    renders[0].job.resolve({ file: new Blob(['mix']), wave: new Int16Array(2000 * 198) });
+    await settle();
+    const state = app.mixState;
+    if (state.kind !== 'done') throw new Error('expected a finished mix');
+    expect(state.name).toBe('mix-20261028-0905-loop.mp3');
+    expect(state.timeline.segments).toEqual([
+      { id: a, name: 'a.mp3', start: 0, end: 99 },
+      { id: b, name: 'b.mp3', start: 98, end: 198 },
+      { id: a, name: 'a.mp3', start: 197, end: 198 },
+    ]);
+  });
+
   it('locks the list and the settings while rendering', async () => {
     const { app } = await analysed();
     const ids = app.tracks.map((t) => t.id);
@@ -292,8 +312,9 @@ describe('App: mixing', () => {
     app.remove(ids[0]);
     app.setCrossfade(8);
     app.setFormat('wav');
+    app.setLoop(true);
     expect(app.tracks.map((t) => t.id)).toEqual(ids);
-    expect(app.settings).toEqual({ crossfade: 1, format: 'mp3' });
+    expect(app.settings).toEqual({ crossfade: 1, format: 'mp3', loop: false });
     expect(app.canMix).toBe(false);
   });
 
@@ -340,6 +361,14 @@ describe('App: mixing', () => {
     app.setCrossfade(8);
     expect(app.mixState.kind).toBe('done');
     expect(app.mixOutdated).toBe(true);
+  });
+
+  it('counts switching Loop as out of date', async () => {
+    const { app } = await mixed();
+    app.setLoop(true);
+    expect(app.mixOutdated).toBe(true);
+    app.setLoop(false);
+    expect(app.mixOutdated).toBe(false);
   });
 
   it('is up to date again when the settings go back', async () => {

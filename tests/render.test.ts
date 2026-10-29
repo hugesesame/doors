@@ -98,4 +98,30 @@ describe.skipIf(!hasFfmpeg)('render with the native ffmpeg', () => {
     expect(Math.abs(single.lufs - -16)).toBeLessThanOrEqual(1);
     expect(ffmpeg(['-hide_banner', '-i', path('single.wav'), '-f', 'null', '-'])).toMatch(/Audio: pcm_s16le.*44100 Hz, stereo/);
   });
+
+  it('with Loop, makes a file of the planned length that runs on from its end into its start', () => {
+    const names = ['a.wav', 'b.flac'];
+    const plan = makePlan(
+      names.map((id) => ({ id, result: { ok: true, analysis: analyse(path(id)) } })),
+      4,
+      true,
+    );
+    expect(plan.loop).toBe(4);
+    ffmpeg(renderArgs(plan, path, FORMATS.wav, path('loop.wav'), path('loop-wave.raw')));
+
+    const decoded = spawnSync('ffmpeg', ['-hide_banner', '-i', path('loop.wav'), '-ac', '1', '-f', 's16le', '-'], {
+      maxBuffer: 1 << 26,
+    }).stdout;
+    const samples = new Int16Array(decoded.buffer, decoded.byteOffset, decoded.length / 2);
+    expect(Math.abs(samples.length / 44100 - plan.total)).toBeLessThanOrEqual(0.01);
+
+    // Played twice in a row, the step from its last sample to its first is no bigger than the steps within it.
+    const step = (i: number, j: number) => Math.abs(samples[j] - samples[i]);
+    let largest = 0;
+    for (let i = 1; i < samples.length; i++) largest = Math.max(largest, step(i - 1, i));
+    expect(largest).toBeGreaterThan(500);
+    expect(step(samples.length - 1, 0)).toBeLessThanOrEqual(largest * 1.2);
+    // And it starts on the first track already playing, with no fade in.
+    expect(Math.max(...samples.slice(0, 441).map(Math.abs))).toBeGreaterThan(5000);
+  });
 });

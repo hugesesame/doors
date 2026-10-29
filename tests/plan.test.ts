@@ -78,6 +78,41 @@ describe('makePlan', () => {
   });
 
   it('is empty without tracks', () => {
-    expect(makePlan([], 4)).toEqual({ tracks: [], joins: [], total: 0 });
+    expect(makePlan([], 4)).toEqual({ tracks: [], joins: [], loop: 0, total: 0 });
+  });
+});
+
+describe('makePlan with Loop', () => {
+  it('crossfades the last track back into the first by the set length', () => {
+    const plan = makePlan([track('a'), track('b'), track('c')], 4, true);
+    expect(plan.joins).toEqual([4, 4]);
+    expect(plan.loop).toBe(4);
+  });
+
+  it('is one crossfade shorter, as the first track starts inside it', () => {
+    const plan = makePlan([track('a', { duration: 100 }), track('b', { duration: 60 })], 4, true);
+    expect(plan.total).toBe(100 + 60 - 4 - 4);
+  });
+
+  it('shortens the loop to half of the first or the last track', () => {
+    expect(makePlan([track('short', { duration: 5 }), track('b')], 4, true).loop).toBe(2.5);
+    expect(makePlan([track('a'), track('short', { duration: 3 })], 4, true).loop).toBe(1.5);
+  });
+
+  it('loops a single track into its own start', () => {
+    const plan = makePlan([track('a', { duration: 100 })], 4, true);
+    expect(plan.loop).toBe(4);
+    expect(plan.total).toBe(96);
+  });
+
+  it('does nothing with the crossfade set to 0', () => {
+    const plan = makePlan([track('a'), track('b')], 0, true);
+    expect(plan.loop).toBe(0);
+    expect(plan.total).toBe(400);
+  });
+
+  it('does nothing when Loop is off, or without tracks', () => {
+    expect(makePlan([track('a'), track('b')], 4).loop).toBe(0);
+    expect(makePlan([], 4, true)).toEqual({ tracks: [], joins: [], loop: 0, total: 0 });
   });
 });

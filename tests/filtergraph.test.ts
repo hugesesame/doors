@@ -7,14 +7,14 @@ const path = (id: string) => `/in/${id}`;
 const prep = (input: number, start: string, end: string, gain: string) =>
   `[${input}:a]atrim=start=${start}:end=${end},asetpts=PTS-STARTPTS,aresample=44100,` +
   `aformat=sample_fmts=fltp:channel_layouts=stereo,volume=${gain}dB[a${input}]`;
-const LIMIT = 'alimiter=limit=0.7943:level=disabled,asplit=2[out][w];[w]aformat=channel_layouts=mono,aresample=2000[wave]';
+const LIMIT = 'alimiter=limit=0.7943:level=disabled:latency=1,asplit=2[out][w];[w]aformat=channel_layouts=mono,aresample=2000[wave]';
 
 /** The value after an option in an argument list. */
 const option = (args: string[], name: string) => args[args.indexOf(name) + 1];
 
 describe('renderArgs', () => {
   it('passes a single track through the limiter, and writes a mono copy for the waveform', () => {
-    const plan: Plan = { tracks: [{ id: 'a', start: 1.5, end: 98, gainDb: -2.345 }], joins: [], total: 96.5 };
+    const plan: Plan = { tracks: [{ id: 'a', start: 1.5, end: 98, gainDb: -2.345 }], joins: [], loop: 0, total: 96.5 };
     const args = renderArgs(plan, path, FORMATS.mp3, '/out/mix.mp3', '/out/wave.raw');
     expect(args.slice(0, 3)).toEqual(['-hide_banner', '-i', '/in/a']);
     expect(option(args, '-filter_complex')).toBe([prep(0, '1.5', '98', '-2.35'), `[a0]${LIMIT}`].join(';'));
@@ -38,6 +38,7 @@ describe('renderArgs', () => {
         { id: 'b', start: 0.25, end: 60, gainDb: 3 },
       ],
       joins: [4],
+      loop: 0,
       total: 155.75,
     };
     const args = renderArgs(plan, path, FORMATS.mp3, '/out/mix.mp3', '/out/wave.raw');
@@ -60,6 +61,7 @@ describe('renderArgs', () => {
         { id: 'c', start: 0, end: 10, gainDb: 0 },
       ],
       joins: [0, 2.5],
+      loop: 0,
       total: 27.5,
     };
     const graph = option(renderArgs(plan, path, FORMATS.mp3, '/out/mix.mp3', '/out/wave.raw'), '-filter_complex').split(';');
@@ -70,8 +72,41 @@ describe('renderArgs', () => {
     ]);
   });
 
+  it('with Loop, starts on the first track after its head and ends crossfading into that head', () => {
+    const plan: Plan = {
+      tracks: [
+        { id: 'a', start: 0, end: 100, gainDb: 0 },
+        { id: 'b', start: 0, end: 60, gainDb: 0 },
+      ],
+      joins: [4],
+      loop: 3,
+      total: 153,
+    };
+    const args = renderArgs(plan, path, FORMATS.wav, '/out/mix.wav', '/out/wave.raw');
+    expect(args.filter((_, i) => args[i - 1] === '-i')).toEqual(['/in/a', '/in/b']);
+    expect(option(args, '-filter_complex').split(';').slice(2)).toEqual([
+      '[a0]asplit=2[b0][h0]',
+      '[b0]atrim=start=3,asetpts=PTS-STARTPTS[s0]',
+      '[h0]atrim=end=3,asetpts=PTS-STARTPTS[e0]',
+      '[s0][a1]acrossfade=d=4:c1=qsin:c2=qsin[x1]',
+      '[x1][e0]acrossfade=d=3:c1=qsin:c2=qsin[x2]',
+      ...`[x2]${LIMIT}`.split(';'),
+    ]);
+  });
+
+  it('loops a single track into its own head', () => {
+    const plan: Plan = { tracks: [{ id: 'a', start: 0, end: 10, gainDb: 0 }], joins: [], loop: 2, total: 8 };
+    const graph = option(renderArgs(plan, path, FORMATS.wav, '/out/mix.wav', '/out/wave.raw'), '-filter_complex');
+    expect(graph.split(';').slice(1, 5)).toEqual([
+      '[a0]asplit=2[b0][h0]',
+      '[b0]atrim=start=2,asetpts=PTS-STARTPTS[s0]',
+      '[h0]atrim=end=2,asetpts=PTS-STARTPTS[e0]',
+      '[s0][e0]acrossfade=d=2:c1=qsin:c2=qsin[x1]',
+    ]);
+  });
+
   it('encodes with the codec of each format', () => {
-    const plan: Plan = { tracks: [{ id: 'a', start: 0, end: 10, gainDb: 0 }], joins: [], total: 10 };
+    const plan: Plan = { tracks: [{ id: 'a', start: 0, end: 10, gainDb: 0 }], joins: [], loop: 0, total: 10 };
     const codec = (id: keyof typeof FORMATS) => {
       const output = `/out/mix.${FORMATS[id].ext}`;
       const args = renderArgs(plan, path, FORMATS[id], output, '/out/wave.raw');

@@ -26,6 +26,8 @@ export interface Settings {
   /** Seconds, from 0 to MAX_CROSSFADE_SEC in steps of CROSSFADE_STEP_SEC. */
   crossfade: number;
   format: FormatId;
+  /** End with a crossfade back into the start, so the file repeats without a break. */
+  loop: boolean;
 }
 
 /** Where the settings are kept between visits; values read back may be missing or out of date. */
@@ -59,13 +61,14 @@ export type EngineState = 'loading' | 'ready' | 'failed';
 const toStep = (seconds: number) => Number((Math.round(seconds / CROSSFADE_STEP_SEC) * CROSSFADE_STEP_SEC).toFixed(1));
 
 function validSettings(saved: Partial<Record<keyof Settings, unknown>>): Settings {
-  const { crossfade, format } = saved;
+  const { crossfade, format, loop } = saved;
   return {
     crossfade:
       typeof crossfade === 'number' && crossfade >= 0 && crossfade <= MAX_CROSSFADE_SEC
         ? toStep(crossfade)
         : DEFAULT_CROSSFADE_SEC,
     format: typeof format === 'string' && format in FORMATS ? (format as FormatId) : DEFAULT_FORMAT,
+    loop: loop === true,
   };
 }
 
@@ -120,7 +123,7 @@ export class App {
   }
 
   get plan(): Plan {
-    return makePlan(this.#tracks, this.#settings.crossfade);
+    return makePlan(this.#tracks, this.#settings.crossfade, this.#settings.loop);
   }
 
   get canMix(): boolean {
@@ -200,6 +203,13 @@ export class App {
     this.#edited();
   }
 
+  setLoop(loop: boolean): void {
+    if (this.rendering) return;
+    this.#settings = validSettings({ ...this.#settings, loop });
+    this.store.save(this.#settings);
+    this.#edited();
+  }
+
   mix(): void {
     if (!this.canMix) return;
     const plan = this.plan;
@@ -227,7 +237,7 @@ export class App {
           this.#mixState = {
             kind: 'done',
             blob: file,
-            name: outputName(names, format, this.now()),
+            name: outputName(names, format, this.now(), plan.loop > 0),
             format,
             peaks: buildPeaks(wave, WAVE_RATE),
             timeline,

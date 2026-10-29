@@ -21,6 +21,7 @@
 - **Even loudness**: every track is brought to -16 LUFS, so no track suddenly jumps out. A quiet track is raised by 10 dB at most, so its noise is not raised with it, and a limiter keeps the peaks under -1 dBTP.
 - **No gaps**: silence at the start and the end of each track is cut.
 - **Crossfades** from 0 to 10 s in steps of 0.1 s (slide, or type the value), with equal-power curves so the level does not dip. Next to a short track the crossfade is shortened to half of that track. The same crossfade is used between every pair of tracks: it cannot be set track by track.
+- **Loop**: the end of the mix crossfades into its start, so a player set to repeat plays it without a break, all through the doors-open time. The file starts just after that crossfade and its name ends in `-loop`. In MP3 and AAC some players leave a tiny gap where the file repeats; WAV and FLAC loop exactly.
 - **Drag to reorder**; × takes a file off the list. Files that cannot be used (unreadable, without sound, or silent throughout) are shown in red and left out.
 - **The finished mix on a waveform**, with each track's name and the crossfades marked. Click anywhere to move the playhead there, or click a name to go to that track's start; zoom in to check a transition.
 - **A player as in [Show Tracks](https://github.com/hugesesame/show-tracks)**: go to the start, back / forward 5 s, play / stop, previous / next track, with the same keys.
@@ -34,7 +35,7 @@
 
 1. Open the app on a computer, in Chrome, Edge, Safari or Firefox.
 2. Drop your tracks on the window (or press **Add Files**) and wait for each to be analysed.
-3. Drag the rows into the order you want, and choose the **Crossfade** and the **Format**.
+3. Drag the rows into the order you want, and choose the **Crossfade**, **Loop** (for a file that repeats) and the **Format**.
 4. Press **MIX** (**CONVERT** for a single file).
 5. Check the mix on the waveform at the bottom: click where you want to listen and press `Space`.
 6. Press **Download**. Chrome and Edge ask where to save it; Safari and Firefox save it to the downloads folder (see [Saving](#saving)).
@@ -60,12 +61,13 @@ On the waveform, a pinch (or ⌘ / Ctrl + wheel) zooms and a sideways swipe (or 
 
 - The tracks are read and mixed inside this browser. Nothing is sent anywhere.
 - The tracks and the mix are not kept: the list is empty when the page is opened again. Download the mix before you close the page.
-- The settings (crossfade, format, Day / Night, the help's language) are remembered in this browser.
+- The settings (crossfade, Loop, format, Day / Night, the help's language) are remembered in this browser.
 
 ## Good to know
 
 - **Browsers**: Chrome, Edge, Safari and Firefox on a computer. It is not made for phones or tablets.
 - <a id="saving"></a>**Saving**: in Chrome and Edge, **Download** opens the save dialog, with the name and the file type filled in. Safari and Firefox have no such dialog for web apps, so the file goes to the downloads folder; to choose each time, turn on asking in the browser's settings (Firefox: *Always ask you where to save files*; Safari: Settings → General → File download location → *Ask for each download*).
+- **Playing it at the venue**: use a player that repeats, such as [Show Tracks](https://github.com/hugesesame/show-tracks), with a Loop file. The player in DOORS is for checking the mix.
 - **Big files**: a file over 1 GB (a long WAV or FLAC) may not fit in the browser's memory; the app says so, and MP3 is the safe choice for long mixes.
 - While a mix is being made, the order and the settings are locked. You can still add files: they are analysed when it is done. **Cancel** stops the mix.
 

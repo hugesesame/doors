@@ -500,6 +500,23 @@ input[type='range']::-moz-range-thumb {
   margin: 0;
 }
 
+.setting-check {
+  grid-column: 2 / 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.setting-check input {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.setting-hint {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .setting-value .unit {
   color: var(--muted);
 }

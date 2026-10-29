@@ -19,12 +19,17 @@ export interface Plan {
   tracks: PlannedTrack[];
   /** The crossfade (seconds) between each track and the next; 0 joins them end to end. */
   joins: number[];
+  /**
+   * With Loop, the crossfade (seconds) from the end of the last track back into the start of the first;
+   * 0 for none. The file then starts where it ends, the first track that far in, so it repeats seamlessly.
+   */
+  loop: number;
   /** The length of the finished mix (seconds). */
   total: number;
 }
 
-/** Works out the mix from the analysed tracks in their list order and the crossfade setting (seconds). */
-export function makePlan(inputs: readonly PlanInput[], crossfade: number): Plan {
+/** Works out the mix from the analysed tracks in their list order, the crossfade setting (seconds) and Loop. */
+export function makePlan(inputs: readonly PlanInput[], crossfade: number, loop = false): Plan {
   const tracks: PlannedTrack[] = [];
   for (const { id, result } of inputs) {
     if (!result?.ok) continue;
@@ -39,11 +44,15 @@ export function makePlan(inputs: readonly PlanInput[], crossfade: number): Plan 
 
   const length = (t: PlannedTrack) => t.end - t.start;
   // Half of each neighbour at most, so the crossfades at both ends of a track never overlap.
-  const joins = tracks.slice(1).map((next, i) => {
-    const fade = Math.min(crossfade, length(tracks[i]) / 2, length(next) / 2);
-    return fade < MIN_CROSSFADE_SEC ? 0 : fade;
-  });
+  const fade = (a: PlannedTrack, b: PlannedTrack) => {
+    const seconds = Math.min(crossfade, length(a) / 2, length(b) / 2);
+    return seconds < MIN_CROSSFADE_SEC ? 0 : seconds;
+  };
+  const joins = tracks.slice(1).map((next, i) => fade(tracks[i], next));
+  // The same rule from the last track round to the first, which may be the same track.
+  const loopFade = loop && tracks.length > 0 ? fade(tracks[tracks.length - 1], tracks[0]) : 0;
 
-  const total = tracks.reduce((sum, t) => sum + length(t), 0) - joins.reduce((sum, j) => sum + j, 0);
-  return { tracks, joins, total };
+  const total =
+    tracks.reduce((sum, t) => sum + length(t), 0) - joins.reduce((sum, j) => sum + j, 0) - loopFade;
+  return { tracks, joins, loop: loopFade, total };
 }
