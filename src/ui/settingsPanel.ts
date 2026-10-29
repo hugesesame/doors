@@ -40,14 +40,14 @@ export function createSettingsPanel(app: App) {
     h('span', { class: 'setting-value' }, crossfadeValue, h('span', { class: 'unit' }, 's')),
   );
 
-  const loopHint = 'End with a crossfade back into the start, so the file repeats without a break';
+  const loopHint = 'One pass through the list whose end crossfades into its start, so a player set to repeat plays it without a break';
   const loop = h('input', { type: 'checkbox', title: loopHint });
   loop.addEventListener('change', () => app.setLoop(loop.checked));
   const loopRow = h(
     'label',
     { class: 'setting', title: loopHint },
     h('span', { class: 'setting-label' }, 'Loop'),
-    h('span', { class: 'setting-check' }, loop, h('span', { class: 'setting-hint' }, 'The end fades into the start')),
+    h('span', { class: 'setting-check' }, loop, h('span', { class: 'setting-hint' }, 'For seamless repeat play')),
   );
 
   const format = h(

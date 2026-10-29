@@ -41,9 +41,19 @@ const HELP: Record<Lang, Text> = {
           ['Loudness', 'Every track is brought to -16 LUFS. A quiet track is raised by 10 dB at most, so its noise is not raised with it.'],
           ['Silence', 'Silence at the start and the end of a track (below -50 dB for 0.5 s or more) is cut, so there are no gaps.'],
           ['Crossfade', '0 to 10 s in steps of 0.1 s (slide, or type the value), with equal-power curves so the level does not dip. Next to a short track it is shortened to half of that track. The same crossfade is used between every pair of tracks: it cannot be set track by track.'],
-          ['Loop', 'With Loop on, the end of the mix crossfades into its start, so a player set to repeat plays it without a break. The file starts just after that crossfade, a moment into the first track, and is one crossfade shorter. It works for a single file too. In MP3 and AAC some players leave a tiny gap where the file repeats; WAV and FLAC loop exactly.'],
           ['Peaks', 'A limiter keeps the peaks under -1 dBTP.'],
           ['Output', '44.1 kHz stereo: MP3 320k, WAV 16-bit, FLAC or AAC 256k (.m4a).'],
+        ],
+      },
+      {
+        title: 'Loop',
+        points: [
+          'Loop makes a file for playing on repeat, all through the doors-open time. Turn it on before MIX, then set your player to repeat.',
+          'The file is still one pass through the list, as long as the Total shown. Nothing is repeated inside it: the player does the repeating.',
+          'Its end runs straight into its start. The last track crossfades into the first, just as between any two tracks; it does not fade out to silence.',
+          'For that, the first moments of the first track (as long as the crossfade: 1 s by default) move from the start of the file to its end, under the last track. So the file starts 1 s into the first track, and is 1 s shorter than without Loop. Only the very first play skips that 1 s; on repeat it is heard at the end, going into the first track.',
+          'In MP3 and AAC, some players leave a tiny gap where the file repeats. WAV and FLAC loop exactly.',
+          'It works for a single file too: its end runs into its own start.',
         ],
       },
       {
@@ -109,9 +119,19 @@ const HELP: Record<Lang, Text> = {
           ['音量', 'すべての曲を -16 LUFS に揃えます。静かな曲を上げるのは最大 10 dB までです。録音のノイズまで持ち上げないためです。'],
           ['無音', '曲の頭と終わりにある無音（-50 dB 以下が 0.5 秒以上）を削り、曲間に間が空かないようにします。'],
           ['クロスフェード', '0〜10 秒を 0.1 秒刻みで設定できます（スライダーか、数字の入力）。重なっている間も音量がへこまない形（equal-power）でつなぎます。短い曲の前後では、その曲の長さの半分まで短くします。すべての曲間で同じ長さを使い、曲ごとに変えることはできません。'],
-          ['ループ', 'Loop をオンにすると、ミックスの終わりが頭へクロスフェードでつながり、リピート再生しても途切れずに流れ続けます。ファイルはそのクロスフェードの直後（最初の曲の少し先）から始まり、クロスフェード 1 回分短くなります。ファイルが 1 つのときも使えます。MP3 と AAC では、プレーヤーによって繰り返しの継ぎ目にごく短い隙間が入ることがあります。WAV と FLAC なら継ぎ目なしでつながります。'],
           ['ピーク', 'リミッターで、ピークを -1 dBTP 以下に抑えます。'],
           ['出力', '44.1 kHz ステレオ。MP3 320k、WAV 16 bit、FLAC、AAC 256k（.m4a）から選べます。'],
+        ],
+      },
+      {
+        title: 'ループ（Loop）',
+        points: [
+          'Loop は、開場中ずっとリピート再生で流しっぱなしにするためのファイルを作ります。MIX の前にオンにして、プレーヤーをリピート再生にしてください。',
+          'ファイルの中身は一覧の 1 周ぶんで、長さは画面の Total のとおりです。ファイルの中で繰り返しているわけではなく、繰り返すのはプレーヤーです。',
+          'ファイルの終わりは、頭へそのままつながります。最後の曲が最初の曲へ、ほかの曲間と同じようにクロスフェードでつながります。無音へフェードアウトして終わることはありません。',
+          'そのために、最初の曲の頭（クロスフェードの長さぶん。初期値なら 1 秒）を、ファイルの先頭から最後へ移し、最後の曲と重ねます。なので、ファイルは最初の曲の 1 秒目から始まり、Loop がオフのときより 1 秒短くなります。その 1 秒が聞こえないのは最初の 1 回だけで、リピートの 2 周目からは、ファイルの最後で最初の曲へつながるところで聞こえます。',
+          'MP3 と AAC では、プレーヤーによって、繰り返しの継ぎ目にごく短い隙間が入ることがあります。WAV と FLAC なら継ぎ目なしでつながります。',
+          'ファイルが 1 つのときも使えます。その曲の終わりが、自分の頭へつながります。',
         ],
       },
       {

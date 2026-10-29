@@ -21,7 +21,7 @@
 - **Even loudness**: every track is brought to -16 LUFS, so no track suddenly jumps out. A quiet track is raised by 10 dB at most, so its noise is not raised with it, and a limiter keeps the peaks under -1 dBTP.
 - **No gaps**: silence at the start and the end of each track is cut.
 - **Crossfades** from 0 to 10 s in steps of 0.1 s (slide, or type the value), with equal-power curves so the level does not dip. Next to a short track the crossfade is shortened to half of that track. The same crossfade is used between every pair of tracks: it cannot be set track by track.
-- **Loop**: the end of the mix crossfades into its start, so a player set to repeat plays it without a break, all through the doors-open time. The file starts just after that crossfade and its name ends in `-loop`. In MP3 and AAC some players leave a tiny gap where the file repeats; WAV and FLAC loop exactly.
+- **Loop**: a file for playing on repeat, whose end runs straight into its start (see [Loop](#loop)).
 - **Drag to reorder**; × takes a file off the list. Files that cannot be used (unreadable, without sound, or silent throughout) are shown in red and left out.
 - **The finished mix on a waveform**, with each track's name and the crossfades marked. Click anywhere to move the playhead there, or click a name to go to that track's start; zoom in to check a transition.
 - **A player as in [Show Tracks](https://github.com/hugesesame/show-tracks)**: go to the start, back / forward 5 s, play / stop, previous / next track, with the same keys.
@@ -41,6 +41,22 @@
 6. Press **Download**. Chrome and Edge ask where to save it; Safari and Firefox save it to the downloads folder (see [Saving](#saving)).
 
 On a recent computer, an hour of tracks takes about a minute to analyse and about 20 seconds to mix.
+
+## Loop
+
+Turn **Loop** on before **MIX** to make a file for playing on repeat, all through the doors-open time; then set your player to repeat.
+
+```
+Loop off   Track 1 (from 0:00) … Track 5 (to its end)                 the file ends
+Loop on    Track 1 (from 0:01) … Track 5 (to its end, fading out)
+                                 + Track 1 (0:00 to 0:01, fading in)   back to the top: Track 1 from 0:01
+```
+
+- The file is one pass through the list, as long as the **Total** shown. Nothing is repeated inside it: the player does the repeating.
+- Its end runs straight into its start. The last track crossfades into the first, just as between any two tracks; it does not fade out to silence.
+- For that, the first moments of the first track (as long as the crossfade: 1 s by default) move from the start of the file to its end, under the last track. So the file starts 1 s into the first track, and is 1 s shorter than without Loop. Only the very first play skips that 1 s; on repeat it is heard at the end, going into the first track.
+- The file's name ends in `-loop`. It works for a single file too: its end runs into its own start.
+- In MP3 and AAC, some players leave a tiny gap where the file repeats. WAV and FLAC loop exactly.
 
 ## Keyboard
 
