@@ -5,6 +5,8 @@
   --panel-raised: #f1f3f6;
   --line: #d8dce3;
   --text: #1a1d23;
+  /* Between the text and the muted grey: the running total in the footer. */
+  --text-soft: #3d434d;
   --muted: #6b7280;
   --accent: #1f6fd1;
   --accent-hover: #3b82e0;
@@ -36,6 +38,7 @@
   --panel-raised: #1a1e25;
   --line: #252a33;
   --text: #e6e8eb;
+  --text-soft: #c3c8cf;
   --muted: #7d8590;
   --accent: #4da3ff;
   --accent-hover: #6cb4ff;
@@ -768,7 +771,8 @@ input[type='range']::-moz-range-thumb {
 }
 
 .total {
-  font: 600 20px var(--mono);
+  font: 500 20px var(--mono);
+  color: var(--text-soft);
   font-variant-numeric: tabular-nums;
 }
 
