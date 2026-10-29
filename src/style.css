@@ -85,18 +85,15 @@ select {
   color: inherit;
 }
 
-button,
-a.button {
+button {
   background: var(--panel-raised);
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 6px 12px;
   cursor: pointer;
-  text-decoration: none;
 }
 
-button:hover:not(:disabled),
-a.button:hover {
+button:hover:not(:disabled) {
   border-color: var(--hover-line);
   background: var(--hover-bg);
 }
@@ -111,7 +108,7 @@ button.small {
   font-size: 12px;
 }
 
-a.button.primary {
+button.primary {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--on-accent);
@@ -119,8 +116,9 @@ a.button.primary {
   text-align: center;
 }
 
-a.button.primary:hover {
+button.primary:hover:not(:disabled) {
   background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 input,
@@ -133,8 +131,7 @@ select {
 
 input:focus,
 select:focus,
-button:focus-visible,
-a.button:focus-visible {
+button:focus-visible {
   outline: 1px solid var(--accent);
   outline-offset: 0;
 }

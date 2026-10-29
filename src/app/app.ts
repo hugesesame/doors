@@ -50,7 +50,7 @@ export interface MixTimeline {
 export type MixState =
   | { kind: 'idle' }
   | { kind: 'rendering'; progress: Progress }
-  | { kind: 'done'; blob: Blob; name: string; peaks: Peaks; timeline: MixTimeline }
+  | { kind: 'done'; blob: Blob; name: string; format: OutputFormat; peaks: Peaks; timeline: MixTimeline }
   | { kind: 'failed'; logTail: string };
 
 export type EngineState = 'loading' | 'ready' | 'failed';
@@ -228,6 +228,7 @@ export class App {
             kind: 'done',
             blob: file,
             name: outputName(names, format, this.now()),
+            format,
             peaks: buildPeaks(wave, WAVE_RATE),
             timeline,
           };

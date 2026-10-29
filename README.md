@@ -37,7 +37,7 @@
 3. Drag the rows into the order you want, and choose the **Crossfade** and the **Format**.
 4. Press **MIX** (**CONVERT** for a single file).
 5. Check the mix on the waveform at the bottom: click where you want to listen and press `Space`.
-6. Press **Download**.
+6. Press **Download**. Chrome and Edge ask where to save it; Safari and Firefox save it to the downloads folder (see [Saving](#saving)).
 
 On a recent computer, an hour of tracks takes about a minute to analyse and about 20 seconds to mix.
 
@@ -65,6 +65,7 @@ On the waveform, a pinch (or ⌘ / Ctrl + wheel) zooms and a sideways swipe (or 
 ## Good to know
 
 - **Browsers**: Chrome, Edge, Safari and Firefox on a computer. It is not made for phones or tablets.
+- <a id="saving"></a>**Saving**: in Chrome and Edge, **Download** opens the save dialog, with the name and the file type filled in. Safari and Firefox have no such dialog for web apps, so the file goes to the downloads folder; to choose each time, turn on asking in the browser's settings (Firefox: *Always ask you where to save files*; Safari: Settings → General → File download location → *Ask for each download*).
 - **Big files**: a file over 1 GB (a long WAV or FLAC) may not fit in the browser's memory; the app says so, and MP3 is the safe choice for long mixes.
 - While a mix is being made, the order and the settings are locked. You can still add files: they are analysed when it is done. **Cancel** stops the mix.
 

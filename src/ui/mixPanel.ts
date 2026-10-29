@@ -1,5 +1,6 @@
 import type { App } from '../app/app';
 import { h } from './dom';
+import { saveFile } from './save';
 
 /** "about 2 min left"; under a minute in seconds, rounded up to 5. */
 function timeLeft(seconds: number): string {
@@ -27,7 +28,9 @@ export function createMixPanel(app: App) {
   );
 
   const doneName = h('span', { class: 'done-name' });
-  const download = h('a', { class: 'button primary' }, '⬇ Download');
+  const DOWNLOAD = '⬇ Download';
+  // Asks where to save where the browser can (Chrome, Edge), else downloads as before.
+  const download = h('button', { type: 'button', class: 'primary download', onclick: () => void saveMix() }, DOWNLOAD);
   const outdated = h('div', { class: 'warning' }, 'Settings changed since this mix. Press MIX to make it again.');
   const result = h(
     'div',
@@ -58,17 +61,17 @@ export function createMixPanel(app: App) {
 
   const element = h('section', { class: 'mix' }, go, note, progress, result, failed);
 
-  let shownBlob: Blob | null = null;
-  let url: string | null = null;
+  let savedTimer: ReturnType<typeof setTimeout> | undefined;
 
-  /** One object URL per finished file, released when the file goes. */
-  function showFile(blob: Blob | null): void {
-    if (blob === shownBlob) return;
-    shownBlob = blob;
-    if (url) URL.revokeObjectURL(url);
-    url = blob ? URL.createObjectURL(blob) : null;
-    if (url) download.href = url;
-    else download.removeAttribute('href');
+  async function saveMix(): Promise<void> {
+    const state = app.mixState;
+    if (state.kind !== 'done') return;
+    const result = await saveFile(state.blob, state.name, state.format);
+    if (result !== 'saved') return;
+    // Saved through the dialog, the browser shows no download: say it here for a moment.
+    download.textContent = '✓ Saved';
+    clearTimeout(savedTimer);
+    savedTimer = setTimeout(() => (download.textContent = DOWNLOAD), 2000);
   }
 
   function update(): void {
@@ -91,11 +94,7 @@ export function createMixPanel(app: App) {
     }
 
     result.hidden = state.kind !== 'done';
-    showFile(state.kind === 'done' ? state.blob : null);
-    if (state.kind === 'done') {
-      doneName.textContent = state.name;
-      download.download = state.name;
-    }
+    if (state.kind === 'done') doneName.textContent = state.name;
     outdated.hidden = !app.mixOutdated;
 
     failed.hidden = state.kind !== 'failed';

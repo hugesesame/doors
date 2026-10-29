@@ -250,6 +250,16 @@ describe('App: mixing', () => {
     expect(app.mixState.kind === 'done' && app.mixState.blob).toBe(blob);
   });
 
+  it('keeps the format the mix was made in, for saving it even after the setting changes', async () => {
+    const { app, renders } = await analysed();
+    app.setFormat('flac');
+    app.mix();
+    renders[0].job.resolve({ file: new Blob(['x']), wave: new Int16Array(0) });
+    await settle();
+    app.setFormat('wav');
+    expect(app.mixState.kind === 'done' && app.mixState.format.id).toBe('flac');
+  });
+
   it('keeps the waveform and where each track plays in the mix', async () => {
     const { app, renders } = await analysed();
     const [a, b] = app.tracks.map((t) => t.id);
